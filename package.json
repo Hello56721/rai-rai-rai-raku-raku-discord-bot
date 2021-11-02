@@ -1,0 +1,15 @@
+{
+  "name": "rai-rai-raku-raku",
+  "version": "1.0.0",
+  "description": "",
+  "main": "rai_rai_raku_raku.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supercharge/strings": "^1.22.0",
+    "discord.js": "^13.2.0"
+  }
+}
