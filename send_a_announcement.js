@@ -4,27 +4,19 @@ fs = require("fs")
 
 const bot = new Client({ intents: [ Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]})
 
+console.log("Token: " + token);
+
 function on_ready()
 {
+    var message = fs.readFileSync("./message.txt", { encoding: "utf-8" })
+    
     bot.channels.fetch("901087334123069530").then((channel) => {
-        try
-        {
-            const message_to_send = fs.readFileSync("./message.txt")
-            
-            try
-            {
-                channel.send(message_to_send)
-            } catch (exception)
-            {
-                console.error("[ERROR]: Failed to deliver message.")
-            }
-        } catch (exception)
-        {
-            console.error("[ERROR]: Failed to read file message.txt")
-        }
+        channel.send(message)
     })
     
-    bot.destroy()
+    setTimeout(() => {
+        bot.destroy()
+    }, 1000)
 }
 
 bot.once("ready", on_ready);
