@@ -4,16 +4,26 @@ fs = require("fs")
 
 const bot = new Client({ intents: [ Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]})
 
-console.log("Token: " + token);
-
 messages = [
     "hi, hitler",
     "that's what hitler would've said",
     "nobody cares",
     "cry abt it :joy_cat:",
     "lol :joy_cat:",
-    "do not 69 his mom please"
+    "if your brain was dynamite there wouldn’t be enough to blow your hat off",
+    "you have so many gaps in your teeth it looks like your tongue is in jail",
+    "hi wumao",
+    "suck my dick, motherfucker",
+    "u wanna fight?",
+    "no",
+    "ok boomer",
+    "dats such an original insult u clearly lack love at home"
 ];
+
+hitlist = [
+    "547898636357337123",
+    "500457346389245963",
+]
 
 function on_ready()
 {
@@ -27,9 +37,9 @@ async function on_message(message)
         return;
     }
     
-    if (message.author.id == 547898636357337123)
+    if (hitlist.includes(message.author.id))
     {
-        message.reply(messages[Math.floor(Math.random() * 6)])
+        message.reply(messages[Math.floor(Math.random() * messages.length)])
     }
 }
 
