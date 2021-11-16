@@ -6,6 +6,12 @@ const bot = new Client({ intents: [ Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_ME
 function on_ready()
 {
     console.log("[INFO]: The bot has logged on.")
+    
+    bot.channels.fetch("892408598494330950").then((channel) => {
+        const collector = channel.createMessageComponentCollector({})
+        
+        collector.on("collect", on_collect);
+    });
 }
 
 async function on_collect(interaction)
@@ -13,7 +19,7 @@ async function on_collect(interaction)
     if (interaction.customId == "ez")
     {
         interaction.deferUpdate()
-        interaction.channel.send("The button has been pressed!")
+        interaction.channel.send("The button has been pressed by " + interaction.user.username + "!")
     }
 }
 
@@ -34,10 +40,6 @@ async function on_message_create(p_message)
         ez_button.setStyle("PRIMARY")
         
         row.addComponents(ez_button)
-        
-        const collector = p_message.channel.createMessageComponentCollector({})
-        
-        collector.on("collect", on_collect);
         
         p_message.channel.send({ content: "d", components: [ row ]})
         
