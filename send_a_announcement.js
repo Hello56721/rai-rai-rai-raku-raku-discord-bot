@@ -10,7 +10,7 @@ function on_ready()
 {
     var message = fs.readFileSync("./message.txt", { encoding: "utf-8" })
     
-    bot.channels.fetch("892408598494330950").then((channel) => {
+    bot.channels.fetch("885220302169186374").then((channel) => {
         channel.send(message)
     })
     
