@@ -55,7 +55,7 @@ function spam_f(channel, prefix, msg, masterMessage)
 
 async function onMessageCreate(message)
 {
-    console.log(message.author.username + ": " + message.content)
+    console.log("(#" + message.channel.name + "): " + message.author.username + ": " + message.content)
     
     if (message.author.id == bot.user.id)
     {
