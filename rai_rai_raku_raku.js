@@ -2,6 +2,7 @@ const
 {
     Client,
     Intents,
+    DMChannel,
 } = require("discord.js")
 const { token } = require("./token.json")
 const Str = require("@supercharge/strings")
@@ -55,7 +56,12 @@ function spam_f(channel, prefix, msg, masterMessage)
 
 async function onMessageCreate(message)
 {
-    console.log("(#" + message.channel.name + "): " + message.author.username + ": " + message.content)
+    if (DMChannel.prototype.isPrototypeOf(message.channel))
+    {
+        console.log("(DM of " + message.channel.recipient.username + "): " + message.author.username + ": " + message.content)
+    } else {
+        console.log("(#" + message.channel.name + "): " + message.author.username + ": " + message.content)
+    }
     
     if (message.author.id == bot.user.id)
     {
@@ -148,16 +154,16 @@ async function onMessageCreate(message)
             msg = "i like cute girls"
         }
         
-        console.log("Spamming user " + channelId + "'s DM.")
+        
         
         message.guild.members.fetch(channelId).then((channel) => {
-            console.log("something")
+            console.log("Spamming user " + channel.user.username + "'s DM.")
             
             spam_f(channel, "<@" + channelId + ">", msg, message)
             
         }).catch(error => {
             message.reply("The specified user could not be found.");
-            console.log("Failed to find the user's DM or something.")
+            console.log(error)
         })
     }
 }
