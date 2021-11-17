@@ -41,8 +41,8 @@ function spam_f(channel, prefix, msg, masterMessage)
         setTimeout(() => 
         {
             spam_f(channel, prefix, msg, masterMessage);
-        });
-    }, 1500).catch((error) => 
+        }, 1500);
+    }).catch((error) => 
     {
         masterMessage.reply("I cannot continue spamming the target because of this error.\n" + 
                             "```" +
