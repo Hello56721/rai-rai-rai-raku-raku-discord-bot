@@ -6,7 +6,17 @@ const
 const { token } = require("./token.json")
 const Str = require("@supercharge/strings")
 
-const bot = new Client({ intents: [ Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]})
+const bot = new Client
+(
+    { 
+        intents:
+        [
+            Intents.FLAGS.GUILDS,
+            Intents.FLAGS.GUILD_MESSAGES,
+            Intents.FLAGS.DIRECT_MESSAGES,
+        ]
+    }
+)
 
 let channelToSend = "0"
 let spam = false
@@ -19,24 +29,39 @@ function onReady()
 
 
 
-function spam_f(channel, prefix, msg)
+function spam_f(channel, prefix, msg, masterMessage)
 {
-    channel.send(prefix + " " + msg)
-    
     if (spam === false)
     {
         return
     }
     
-    setTimeout(() => {
-        spam_f(channel, prefix, msg)
-    }, 1500)
+    channel.send(prefix + " " + msg).then(() =>
+    {
+        setTimeout(() => 
+        {
+            spam_f(channel, prefix, msg, masterMessage);
+        });
+    }, 1500).catch((error) => 
+    {
+        masterMessage.reply("I cannot continue spamming the target because of this error.\n" + 
+                            "```" +
+                            error +
+                            "```")
+    })
 }
 
 
 
 async function onMessageCreate(message)
 {
+    console.log(message.author.username + ": " + message.content)
+    
+    if (message.author.id == bot.user.id)
+    {
+        return;
+    }
+    
     // Check for trademark violations
     if (message.author.id != "690265771955585029" && message.author.id != "725811783012450306")
     {
@@ -109,6 +134,31 @@ async function onMessageCreate(message)
         setTimeout(() => {
             spam_f(message.channel, prefix, msg)
         }, 1500)
+    }
+    
+    if (message.content.startsWith("$$$start_spamming_dm$$$"))
+    {
+        spam = true
+        
+        let channelId = message.content.split(" ")[1]
+        
+        let msg = message.content.split("||")[1]
+        if (msg == undefined)
+        {
+            msg = "i like cute girls"
+        }
+        
+        console.log("Spamming user " + channelId + "'s DM.")
+        
+        message.guild.members.fetch(channelId).then((channel) => {
+            console.log("something")
+            
+            spam_f(channel, "<@" + channelId + ">", msg, message)
+            
+        }).catch(error => {
+            message.reply("The specified user could not be found.");
+            console.log("Failed to find the user's DM or something.")
+        })
     }
 }
 
