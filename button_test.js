@@ -7,7 +7,7 @@ function on_ready()
 {
     console.log("[INFO]: The bot has logged on.")
     
-    bot.channels.fetch("892408598494330950").then((channel) => {
+    bot.channels.fetch("885220302169186374").then((channel) => {
         const collector = channel.createMessageComponentCollector({})
         
         collector.on("collect", on_collect);
@@ -36,8 +36,8 @@ async function on_message_create(p_message)
         
         const ez_button = new MessageButton()
         ez_button.setCustomId("ez")
-        ez_button.setLabel("ez")
-        ez_button.setStyle("PRIMARY")
+        ez_button.setLabel("DO NOT PRESS THIS BUTTON")
+        ez_button.setStyle("DANGER")
         
         row.addComponents(ez_button)
         
