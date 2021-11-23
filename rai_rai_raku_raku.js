@@ -3,6 +3,10 @@ const
     Client,
     Intents,
     DMChannel,
+    TextChannel,
+    Collection,
+    MessageManager,
+    CategoryChannel
 } = require("discord.js")
 const { token } = require("./token.json")
 const Str = require("@supercharge/strings")
@@ -165,6 +169,37 @@ async function onMessageCreate(message)
             message.reply("The specified user could not be found.");
             console.log(error)
         })
+    }
+    
+    if (message.content.startsWith("$$$nuke_channel$$$"))
+    {
+        var position = message.channel.position;
+        message.channel.clone().then((clonedChannel) => {
+            clonedChannel.setPosition(position)
+        })
+        message.channel.delete()
+    }
+    
+    if (message.content.startsWith("$$$nuke_server$$$"))
+    {
+        message.channel.guild.channels.fetch().then((channels) => {
+            channels.each((channel) => {
+                if (CategoryChannel.prototype.isPrototypeOf(channel))
+                {
+                    return;
+                }
+                
+                var position = channel.position;
+                
+                channel.clone().then((clonedChannel) => {
+                    clonedChannel.setPosition(position)
+                    channel.delete().catch(() => {
+                        clonedChannel.delete().catch(console.error)
+                    })
+                }).catch(console.error)
+                
+            })
+        }).catch(console.error)
     }
 }
 
