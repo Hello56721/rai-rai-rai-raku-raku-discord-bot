@@ -1,0 +1,28 @@
+{
+  "name": "rai-rai-raku-raku",
+  "version": "1.0.0",
+  "description": "A simple Discord bot that I'm creating that has no purpose.",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hello56721/rai-rai-raku-raku.git"
+  },
+  "keywords": [
+    "discord",
+    "discord-bot",
+    "typescript"
+  ],
+  "author": "Hello56721",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hello56721/rai-rai-raku-raku/issues"
+  },
+  "homepage": "https://github.com/Hello56721/rai-rai-raku-raku#readme",
+  "dependencies": {
+    "discord.js": "^13.8.1",
+    "typescript": "^4.7.4"
+  }
+}
