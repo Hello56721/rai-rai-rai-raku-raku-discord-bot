@@ -10,6 +10,8 @@ let client = new Discord.Client({
 
 client.once("ready", (client) => {
     console.log(`[INFO]: Logged in to Discord as ${client.user.tag}.`)
+    
+    client.user.setActivity("OnlyFans", { type: "WATCHING" })
 })
 
 client.login(Secrets.TOKEN)
