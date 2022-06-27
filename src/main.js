@@ -7,6 +7,23 @@ const discord_js_1 = __importDefault(require("discord.js"));
 const secrets_json_1 = __importDefault(require("../data/secrets.json"));
 const annoying_1 = __importDefault(require("./commands/annoying"));
 let commands = new Map();
+function logMessage(message) {
+    let messageAuthor = message.author.tag;
+    let messageChannel = "";
+    if (message.channel.isText()) {
+        if (message.guild != null) {
+            messageChannel = message.channel.name;
+        }
+        else {
+            messageChannel = message.channel.recipient.tag;
+        }
+    }
+    let messageGuild = "";
+    if (message.guild != null) {
+        messageGuild = message.guild.nameAcronym;
+    }
+    console.log(`[MESSAGE ${messageAuthor} ${messageGuild} ${messageChannel}]: ${message.content}`);
+}
 annoying_1.default.registerCommand(commands);
 let client = new discord_js_1.default.Client({
     intents: [
@@ -18,6 +35,7 @@ client.once("ready", (client) => {
     console.log(`[INFO]: Logged in to Discord as ${client.user.tag}.`);
 });
 client.on("messageCreate", (message) => {
+    logMessage(message);
     let commandName = message.content.split(" ")[0];
     let commandArguments = message.content.substring(commandName.length);
     let commandHandler = commands.get(commandName);
