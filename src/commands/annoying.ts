@@ -4,7 +4,7 @@ import Utilities from "../utilities"
 
 let isSpamming = false
 
-function registerCommand(commands: Map<string, CommandHandler>) {
+function registerCommands(commands: Map<string, CommandHandler>) {
     commands.set("$$$start_spamming$$$", (context, commandArguments) => {
         if (!isSpamming) {
             function spam(channel: Discord.TextChannel, message: string) {
@@ -70,5 +70,5 @@ function registerCommand(commands: Map<string, CommandHandler>) {
 }
 
 export default {
-    registerCommand
+    registerCommands
 }
