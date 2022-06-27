@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const utilities_1 = __importDefault(require("../utilities"));
 let isSpamming = false;
-function registerCommand(commands) {
+function registerCommands(commands) {
     commands.set("$$$start_spamming$$$", (context, commandArguments) => {
         if (!isSpamming) {
             function spam(channel, message) {
@@ -61,6 +61,6 @@ function registerCommand(commands) {
     });
 }
 exports.default = {
-    registerCommand
+    registerCommands
 };
 //# sourceMappingURL=annoying.js.map
