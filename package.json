@@ -4,7 +4,7 @@
   "description": "A simple Discord bot that I'm creating that has no purpose.",
   "main": "src/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node src/tester.js"
   },
   "repository": {
     "type": "git",
