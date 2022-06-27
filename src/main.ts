@@ -14,4 +14,8 @@ client.once("ready", (client) => {
     client.user.setActivity("OnlyFans", { type: "WATCHING" })
 })
 
+client.on("messageCreate", (message) => {
+    // TODO: Handle commands
+})
+
 client.login(Secrets.TOKEN)
