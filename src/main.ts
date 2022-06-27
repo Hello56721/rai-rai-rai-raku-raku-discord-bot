@@ -6,6 +6,8 @@ import AnnoyingCommands from "./commands/annoying"
 
 let commands = new Map<string, CommandHandler>()
 
+AnnoyingCommands.registerCommands(commands)
+
 function logMessage(message: Discord.Message) {
     let messageAuthor = message.author.tag
     
@@ -25,8 +27,6 @@ function logMessage(message: Discord.Message) {
     
     console.log(`[MESSAGE ${messageAuthor} ${messageGuild} ${messageChannel}]: ${message.content}`)
 }
-
-AnnoyingCommands.registerCommand(commands)
 
 let client = new Discord.Client({
     intents: [

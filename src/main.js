@@ -7,6 +7,7 @@ const discord_js_1 = __importDefault(require("discord.js"));
 const secrets_json_1 = __importDefault(require("../data/secrets.json"));
 const annoying_1 = __importDefault(require("./commands/annoying"));
 let commands = new Map();
+annoying_1.default.registerCommands(commands);
 function logMessage(message) {
     let messageAuthor = message.author.tag;
     let messageChannel = "";
@@ -24,7 +25,6 @@ function logMessage(message) {
     }
     console.log(`[MESSAGE ${messageAuthor} ${messageGuild} ${messageChannel}]: ${message.content}`);
 }
-annoying_1.default.registerCommand(commands);
 let client = new discord_js_1.default.Client({
     intents: [
         discord_js_1.default.Intents.FLAGS.GUILDS,
