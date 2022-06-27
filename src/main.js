@@ -16,7 +16,6 @@ let client = new discord_js_1.default.Client({
 });
 client.once("ready", (client) => {
     console.log(`[INFO]: Logged in to Discord as ${client.user.tag}.`);
-    console.log(commands);
     client.user.setActivity("OnlyFans", { type: "WATCHING" });
 });
 client.on("messageCreate", (message) => {
