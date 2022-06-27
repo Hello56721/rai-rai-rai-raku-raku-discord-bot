@@ -31,7 +31,8 @@ AnnoyingCommands.registerCommand(commands)
 let client = new Discord.Client({
     intents: [
         Discord.Intents.FLAGS.GUILDS,
-        Discord.Intents.FLAGS.GUILD_MESSAGES
+        Discord.Intents.FLAGS.GUILD_MESSAGES,
+        Discord.Intents.FLAGS.DIRECT_MESSAGES
     ]
 })
 
@@ -43,7 +44,7 @@ client.on("messageCreate", (message) => {
     logMessage(message)
     
     let commandName = message.content.split(" ")[0]
-    let commandArguments = message.content.substring(commandName.length)
+    let commandArguments = message.content.substring(commandName.length + 1)
     
     let commandHandler = commands.get(commandName)
     if (commandHandler != undefined) {

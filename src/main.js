@@ -28,7 +28,8 @@ annoying_1.default.registerCommand(commands);
 let client = new discord_js_1.default.Client({
     intents: [
         discord_js_1.default.Intents.FLAGS.GUILDS,
-        discord_js_1.default.Intents.FLAGS.GUILD_MESSAGES
+        discord_js_1.default.Intents.FLAGS.GUILD_MESSAGES,
+        discord_js_1.default.Intents.FLAGS.DIRECT_MESSAGES
     ]
 });
 client.once("ready", (client) => {
@@ -37,7 +38,7 @@ client.once("ready", (client) => {
 client.on("messageCreate", (message) => {
     logMessage(message);
     let commandName = message.content.split(" ")[0];
-    let commandArguments = message.content.substring(commandName.length);
+    let commandArguments = message.content.substring(commandName.length + 1);
     let commandHandler = commands.get(commandName);
     if (commandHandler != undefined) {
         commandHandler(message, commandArguments);
