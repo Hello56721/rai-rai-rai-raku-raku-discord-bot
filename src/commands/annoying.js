@@ -47,14 +47,22 @@ function registerCommands(commands) {
             if (isSpamming) {
                 channel.send(message).catch((error) => {
                     isSpamming = false;
-                    console.log(error);
+                    context.reply("i got blocked :sob:");
                 });
                 setTimeout(spam, 1500, channel, message);
             }
         }
         (_a = context.guild) === null || _a === void 0 ? void 0 : _a.members.fetch(spamTarget).then((member) => {
-            context.reply(`spamming ${member.nickname}'s dm lmao :joy_cat:`);
-            spam(member, spamMessage);
+            let targetName = "";
+            if (member.nickname != null) {
+                targetName = member.nickname;
+            }
+            else {
+                targetName = member.user.username;
+            }
+            member.send(spamMessage).then(() => {
+                spam(member, spamMessage);
+            }).catch(() => context.reply("cant dm this guy :rage:"));
         }).catch(() => {
             context.reply("something went wrong sorry");
         });

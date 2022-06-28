@@ -50,19 +50,27 @@ function registerCommands(commands: Map<string, CommandHandler>) {
             spamTarget = Utilities.mentionToUserID(spamTarget)
         }
         
-        function spam(channel: Discord.TextChannel, message: string) {
+        function spam(channel: Discord.GuildMember, message: string) {
             if (isSpamming) {
                 channel.send(message).catch((error) => {
                     isSpamming = false
-                    console.log(error)
+                    context.reply("i got blocked :sob:")
                 })
                 setTimeout(spam, 1500, channel, message)
             }
         }
         
         context.guild?.members.fetch(spamTarget).then((member) => {
-            context.reply(`spamming ${member.nickname}'s dm lmao :joy_cat:`)
-            spam(member as unknown as Discord.TextChannel, spamMessage)
+            let targetName = ""
+            if (member.nickname != null) {
+                targetName = member.nickname
+            } else {
+                targetName = member.user.username
+            }
+            
+            member.send(spamMessage).then(() => {
+                spam(member, spamMessage)
+            }).catch(() => context.reply("cant dm this guy :rage:"))
         }).catch(() => {
             context.reply("something went wrong sorry")
         })
