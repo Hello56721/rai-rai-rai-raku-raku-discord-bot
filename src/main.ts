@@ -2,7 +2,7 @@ import Discord from "discord.js"
 import Secrets from "../data/secrets.json"
 import CommandHandler from "./command-handler"
 
-import AnnoyingCommands from "./commands/annoying"
+import AnnoyingCommands from "./commands/spam"
 
 let commands = new Map<string, CommandHandler>()
 

@@ -5,9 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = __importDefault(require("discord.js"));
 const secrets_json_1 = __importDefault(require("../data/secrets.json"));
-const annoying_1 = __importDefault(require("./commands/annoying"));
+const spam_1 = __importDefault(require("./commands/spam"));
 let commands = new Map();
-annoying_1.default.registerCommands(commands);
+spam_1.default.registerCommands(commands);
 function logMessage(message) {
     let messageAuthor = message.author.tag;
     let messageChannel = "";
