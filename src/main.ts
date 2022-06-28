@@ -2,11 +2,11 @@ import Discord from "discord.js"
 import Secrets from "../data/secrets.json"
 import CommandHandler from "./command-handler"
 
-import AnnoyingCommands from "./commands/spam"
+import SpamCommands from "./commands/spam"
 
 let commands = new Map<string, CommandHandler>()
 
-AnnoyingCommands.registerCommands(commands)
+SpamCommands.registerCommands(commands)
 
 function logMessage(message: Discord.Message) {
     let messageAuthor = message.author.tag
