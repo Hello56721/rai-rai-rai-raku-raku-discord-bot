@@ -63,14 +63,15 @@ function registerCommands(commands: Map<string, CommandHandler>) {
         context.guild?.members.fetch(spamTarget).then((member) => {
             let targetName = ""
             if (member.nickname != null) {
-                targetName = member.nickname
+                targetName = member.nickname.toLowerCase()
             } else {
-                targetName = member.user.username
+                targetName = member.user.username.toLowerCase()
             }
             
             member.send(spamMessage).then(() => {
                 spam(member, spamMessage)
-            }).catch(() => context.reply("cant dm this guy :rage:"))
+                context.reply(`spamming ${targetName}'s DM lmao :joy_cat:`)
+            }).catch(() => context.reply(`cant dm ${targetName} :rage:`))
         }).catch(() => {
             context.reply("something went wrong sorry")
         })
