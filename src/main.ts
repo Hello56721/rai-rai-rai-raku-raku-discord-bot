@@ -3,10 +3,12 @@ import Secrets from "../data/secrets.json"
 import CommandHandler from "./command-handler"
 
 import SpamCommands from "./commands/spam"
+import NameCommands from "./commands/names"
 
 let commands = new Map<string, CommandHandler>()
 
 SpamCommands.registerCommands(commands)
+NameCommands.registerCommands(commands)
 
 function logMessage(message: Discord.Message) {
     let messageAuthor = message.author.tag
@@ -32,7 +34,8 @@ let client = new Discord.Client({
     intents: [
         Discord.Intents.FLAGS.GUILDS,
         Discord.Intents.FLAGS.GUILD_MESSAGES,
-        Discord.Intents.FLAGS.DIRECT_MESSAGES
+        Discord.Intents.FLAGS.DIRECT_MESSAGES,
+        Discord.Intents.FLAGS.GUILD_MEMBERS
     ]
 })
 
