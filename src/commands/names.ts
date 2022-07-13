@@ -1,5 +1,6 @@
 import Discord from "discord.js"
 import CommandHandler from "../command-handler.js"
+import arrayShuffle from "array-shuffle"
 
 const VALORANT_NAMES = [
     "Brimstone",
@@ -34,16 +35,24 @@ function shuffle(a: Array<any>) {
 function registerCommands(commands: Map<string, CommandHandler>) {
     commands.set("$$$change_names_to_valorant$$$", (context, commandArguments) => {
         context.guild?.members.fetch().then((members) => {
+            let names = arrayShuffle(VALORANT_NAMES);
+            
             members.each((member) => {
-                let names = shuffle(VALORANT_NAMES);
-                
-                for (let i = 0; i < 10000000; i++)
-                {
-                    shuffle(names);
+                let nickname = names.pop()
+                if (nickname == undefined) {
+                    names = arrayShuffle(VALORANT_NAMES);
+                    nickname = names.pop()
+                    
+                    console.log(`[INFO]: Trying to change ${member.user.tag}'s nickname to ${nickname}`)
+                    member.setNickname(nickname as string).then((member) => {
+                        console.log(`[INFO]: Changed ${member.user.tag}'s nickname to ${member.nickname}.`)
+                    }).catch(console.error)
+                } else {
+                    console.log(`[INFO]: Trying to change ${member.user.tag}'s nickname to ${nickname}`)
+                    member.setNickname(nickname as string).then((member) => {
+                        console.log(`[INFO]: Changed ${member.user.tag}'s nickname to ${member.nickname}.`)
+                    }).catch(console.error)
                 }
-                
-                console.log(`Changing name of ${member.user.username}.`)
-                member.setNickname(names[Math.floor(Math.random() * names.length - 1)]).catch(console.error);
             })
         })
     })
