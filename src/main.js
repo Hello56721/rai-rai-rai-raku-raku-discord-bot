@@ -1,15 +1,10 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const discord_js_1 = __importDefault(require("discord.js"));
-const secrets_json_1 = __importDefault(require("../data/secrets.json"));
-const spam_1 = __importDefault(require("./commands/spam"));
-const names_1 = __importDefault(require("./commands/names"));
+import Discord from "discord.js";
+import Secrets from "../data/secrets.json" assert { type: "json" };
+import SpamCommands from "./commands/spam.js";
+import NameCommands from "./commands/names.js";
 let commands = new Map();
-spam_1.default.registerCommands(commands);
-names_1.default.registerCommands(commands);
+SpamCommands.registerCommands(commands);
+NameCommands.registerCommands(commands);
 function logMessage(message) {
     let messageAuthor = message.author.tag;
     let messageChannel = "";
@@ -27,12 +22,12 @@ function logMessage(message) {
     }
     console.log(`[MESSAGE ${messageAuthor} ${messageGuild} ${messageChannel}]: ${message.content}`);
 }
-let client = new discord_js_1.default.Client({
+let client = new Discord.Client({
     intents: [
-        discord_js_1.default.Intents.FLAGS.GUILDS,
-        discord_js_1.default.Intents.FLAGS.GUILD_MESSAGES,
-        discord_js_1.default.Intents.FLAGS.DIRECT_MESSAGES,
-        discord_js_1.default.Intents.FLAGS.GUILD_MEMBERS
+        Discord.Intents.FLAGS.GUILDS,
+        Discord.Intents.FLAGS.GUILD_MESSAGES,
+        Discord.Intents.FLAGS.DIRECT_MESSAGES,
+        Discord.Intents.FLAGS.GUILD_MEMBERS
     ]
 });
 client.once("ready", (client) => {
@@ -50,5 +45,5 @@ client.on("messageCreate", (message) => {
         // Do other stuff that are not command related.
     }
 });
-client.login(secrets_json_1.default.TOKEN);
+client.login(Secrets.TOKEN);
 //# sourceMappingURL=main.js.map

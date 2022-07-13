@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const VALORANT_NAMES = [
     "Brimstone",
     "Viper",
@@ -43,7 +41,7 @@ function registerCommands(commands) {
         });
     });
 }
-exports.default = {
+export default {
     registerCommands
 };
 //# sourceMappingURL=names.js.map

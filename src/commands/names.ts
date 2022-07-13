@@ -1,5 +1,5 @@
 import Discord from "discord.js"
-import CommandHandler from "../command-handler"
+import CommandHandler from "../command-handler.js"
 
 const VALORANT_NAMES = [
     "Brimstone",

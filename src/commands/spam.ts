@@ -1,6 +1,6 @@
 import Discord from "discord.js"
-import CommandHandler from "../command-handler"
-import Utilities from "../utilities"
+import CommandHandler from "../command-handler.js"
+import Utilities from "../utilities.js"
 
 let isSpamming = false
 

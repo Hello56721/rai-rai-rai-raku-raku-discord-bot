@@ -1,8 +1,9 @@
 {
   "name": "rai-rai-raku-raku",
+  "type": "module",
   "version": "1.0.0",
   "description": "A simple Discord bot that I'm creating that has no purpose.",
-  "main": "src/main.js",
+  "exports": "./src/main.js",
   "scripts": {
     "test": "node src/tester.js"
   },
@@ -24,5 +25,8 @@
   "dependencies": {
     "discord.js": "^13.8.1",
     "typescript": "^4.7.4"
+  },
+  "engines": {
+    "node": ">=14.16"
   }
 }

@@ -1,9 +1,9 @@
 import Discord from "discord.js"
-import Secrets from "../data/secrets.json"
-import CommandHandler from "./command-handler"
+import Secrets from "../data/secrets.json" assert { type: "json" }
+import CommandHandler from "./command-handler.js"
 
-import SpamCommands from "./commands/spam"
-import NameCommands from "./commands/names"
+import SpamCommands from "./commands/spam.js"
+import NameCommands from "./commands/names.js"
 
 let commands = new Map<string, CommandHandler>()
 

@@ -1,9 +1,4 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const utilities_1 = __importDefault(require("../utilities"));
+import Utilities from "../utilities.js";
 let isSpamming = false;
 function registerCommands(commands) {
     commands.set("$$$start_spamming$$$", (context, commandArguments) => {
@@ -40,8 +35,8 @@ function registerCommands(commands) {
         if (spamMessage.length == 0) {
             spamMessage = "i like cute girls";
         }
-        if (utilities_1.default.isMention(spamTarget)) {
-            spamTarget = utilities_1.default.mentionToUserID(spamTarget);
+        if (Utilities.isMention(spamTarget)) {
+            spamTarget = Utilities.mentionToUserID(spamTarget);
         }
         function spam(channel, message) {
             if (isSpamming) {
@@ -69,7 +64,7 @@ function registerCommands(commands) {
         });
     });
 }
-exports.default = {
+export default {
     registerCommands
 };
 //# sourceMappingURL=spam.js.map
