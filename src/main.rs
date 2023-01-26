@@ -24,14 +24,14 @@ impl discord::EventHandler for EventHandler {
 
 #[tokio::main]
 async fn main() {
-    let token = std::env::var("DISCORD_TOKEN")
-        .expect("The variable DISCORD_TOKEN was not set on the environment.");
+    let token = std::fs::read_to_string("user/token.txt").expect("Failed to load the token file.");
 
     let intents = discord::GatewayIntents::GUILDS
         | discord::GatewayIntents::GUILD_MESSAGES
         | discord::GatewayIntents::MESSAGE_CONTENT;
 
-    let mut bot = discord::Client::builder(token, intents)
+    let mut bot = discord::Client::builder(&token, intents)
+        .event_handler(EventHandler)
         .await
         .expect("Failed to create the client. Perhaps the token wasn't valid?");
 
