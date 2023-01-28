@@ -1,8 +1,11 @@
 use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
     model::{
-        application::interaction::Interaction, channel::Message, gateway::Ready, id::UserId,
-        prelude::{GuildId, command::CommandOptionType},
+        application::interaction::Interaction,
+        channel::Message,
+        gateway::Ready,
+        id::UserId,
+        prelude::{command::CommandOptionType},
     },
     prelude::GatewayIntents,
 };
@@ -10,8 +13,6 @@ use serenity::{
 use tokio::sync::Mutex;
 
 mod commands;
-
-const MAIN_SERVER: GuildId = GuildId(973716864301678702);
 
 #[derive(Default)]
 struct Bot {
@@ -69,37 +70,42 @@ impl DiscordEventHandler for EventHandler {
         let mut bot = self.bot.lock().await;
         bot.id = ready.user.id;
 
-        let guild = MAIN_SERVER;
-
-        guild
-            .set_application_commands(&context.http, |commands| {
-                commands.create_application_command(|command| {
-                    command
-                        .name("restart")
-                        .description("Restarts the bot. Can only be used by developer.")
-                })
-                .create_application_command(|command| {
-                    command
-                        .name("dm")
-                        .description("DMs somebody. duh.")
-                        .create_option(|option| {
-                            option
-                                .name("member")
-                                .description("The member that you want to DM")
-                                .kind(CommandOptionType::User)
-                                .required(true)
+        for guild in ready.user.guilds(context.clone()).await.unwrap() {
+            println!("[INFO]: Adding commands for {}", guild.name);
+            guild
+                .id
+                .set_application_commands(context.clone(), |commands| {
+                    commands
+                        .create_application_command(|command| {
+                            command
+                                .name("restart")
+                                .description("Restarts the bot. Can only be used by developer.")
                         })
-                        .create_option(|option| {
-                            option
-                                .name("message")
-                                .description("The message that you want to DM to that person.")
-                                .kind(CommandOptionType::String)
-                                .required(true)
+                        .create_application_command(|command| {
+                            command
+                                .name("dm")
+                                .description("DMs somebody. duh.")
+                                .create_option(|option| {
+                                    option
+                                        .name("member")
+                                        .description("The member that you want to DM")
+                                        .kind(CommandOptionType::User)
+                                        .required(true)
+                                })
+                                .create_option(|option| {
+                                    option
+                                        .name("message")
+                                        .description(
+                                            "The message that you want to DM to that person.",
+                                        )
+                                        .kind(CommandOptionType::String)
+                                        .required(true)
+                                })
                         })
                 })
-            })
-            .await
-            .expect("Failed to register application commands for main server.");
+                .await
+                .expect("Failed to register application commands for main server.");
+        }
     }
 
     async fn interaction_create(&self, context: Context, interaction: Interaction) {
