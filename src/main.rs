@@ -1,10 +1,15 @@
+use serenity::model::application::interaction::Interaction;
+use serenity::model::application::interaction::InteractionResponseType;
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::model::id::UserId;
+use serenity::model::prelude::GuildId;
 use serenity::prelude as discord;
 
 use std::process::Command;
 use tokio::sync::Mutex;
+
+const MAIN_SERVER: GuildId = GuildId(973716864301678702);
 
 #[derive(Default)]
 struct Bot {
@@ -17,11 +22,24 @@ struct EventHandler {
 
 #[serenity::async_trait]
 impl discord::EventHandler for EventHandler {
-    async fn ready(&self, _: discord::Context, ready: Ready) {
+    async fn ready(&self, context: discord::Context, ready: Ready) {
         println!("[INFO]: The bot has logged on as {}", ready.user.name);
 
         let mut bot = self.bot.lock().await;
         bot.id = ready.user.id;
+
+        let guild = MAIN_SERVER;
+
+        guild
+            .set_application_commands(&context.http, |commands| {
+                commands.create_application_command(|command| {
+                    command
+                        .name("restart")
+                        .description("Restarts the bot. Can only be used by developer.")
+                })
+            })
+            .await
+            .expect("Failed to register application commands for main server.");
     }
 
     async fn message(&self, context: discord::Context, message: Message) {
@@ -40,10 +58,46 @@ impl discord::EventHandler for EventHandler {
                     why
                 );
             }
-        } else if message.content == "$$$restart$$$" && message.author.id == 650439182204010496 {
-            Command::new("cargo").arg("run").spawn().unwrap();
+        } else if message.content.to_lowercase().starts_with("indeed") {
+            if let Err(error) = message.reply_ping(context, "indeedn't").await {
+                println!(
+                    "[ERROR]: Failed to reply to a message. Here's why:\n{:?}",
+                    error
+                )
+            }
+        }
+    }
 
-            std::process::exit(0);
+    async fn interaction_create(&self, context: discord::Context, interaction: Interaction) {
+        if let Interaction::ApplicationCommand(command) = interaction {
+            if command.data.name == "restart" {
+                let mut should_shut_down = false;
+
+                command
+                    .create_interaction_response(context, |response| {
+                        response
+                            .interaction_response_data(|message| {
+                                if let Err(why) = Command::new("cargo").arg("run").spawn() {
+                                    message
+                                        .content(format!(
+                                            "failed to restart sorry. error {:?}",
+                                            why
+                                        ))
+                                        .ephemeral(true)
+                                } else {
+                                    should_shut_down = true;
+                                    message.content("Restarting the bot").ephemeral(true)
+                                }
+                            })
+                            .kind(InteractionResponseType::ChannelMessageWithSource)
+                    })
+                    .await
+                    .expect("bozo failure");
+
+                if should_shut_down {
+                    std::process::exit(0);
+                }
+            }
         }
     }
 }
