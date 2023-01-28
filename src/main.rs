@@ -5,7 +5,7 @@ use serenity::{
         channel::Message,
         gateway::Ready,
         id::UserId,
-        prelude::GuildId,
+        prelude::{command, GuildId},
     },
     prelude::GatewayIntents,
 };
@@ -28,26 +28,6 @@ struct EventHandler {
 
 #[serenity::async_trait]
 impl DiscordEventHandler for EventHandler {
-    async fn ready(&self, context: Context, ready: Ready) {
-        println!("[INFO]: The bot has logged on as {}", ready.user.name);
-
-        let mut bot = self.bot.lock().await;
-        bot.id = ready.user.id;
-
-        let guild = MAIN_SERVER;
-
-        guild
-            .set_application_commands(&context.http, |commands| {
-                commands.create_application_command(|command| {
-                    command
-                        .name("restart")
-                        .description("Restarts the bot. Can only be used by developer.")
-                })
-            })
-            .await
-            .expect("Failed to register application commands for main server.");
-    }
-
     async fn message(&self, context: Context, message: Message) {
         println!("[MESSAGE]: {}", message.content);
 
@@ -87,36 +67,59 @@ impl DiscordEventHandler for EventHandler {
         }
     }
 
+    async fn ready(&self, context: Context, ready: Ready) {
+        println!("[INFO]: The bot has logged on as {}", ready.user.name);
+
+        let mut bot = self.bot.lock().await;
+        bot.id = ready.user.id;
+
+        let guild = MAIN_SERVER;
+
+        guild
+            .set_application_commands(&context.http, |commands| {
+                commands.create_application_command(|command| {
+                    command
+                        .name("restart")
+                        .description("Restarts the bot. Can only be used by developer.")
+                })
+            })
+            .await
+            .expect("Failed to register application commands for main server.");
+    }
+
     async fn interaction_create(&self, context: Context, interaction: Interaction) {
         if let Interaction::ApplicationCommand(command) = interaction {
-            if command.data.name == "restart" {
-                let mut should_shut_down = false;
+            match command.data.name.as_str() {
+                "restart" => {
+                    let mut should_shut_down = false;
 
-                command
-                    .create_interaction_response(context, |response| {
-                        response
-                            .interaction_response_data(|message| {
-                                if let Err(why) = Command::new("cargo").arg("run").spawn() {
-                                    message
-                                        .content(format!(
-                                            "failed to restart sorry. error {:?}",
-                                            why
-                                        ))
-                                        .ephemeral(true)
-                                } else {
-                                    should_shut_down = true;
-                                    message.content("Restarting the bot").ephemeral(true)
-                                }
-                            })
-                            .kind(InteractionResponseType::ChannelMessageWithSource)
-                    })
-                    .await
-                    .expect("bozo failure");
+                    command
+                        .create_interaction_response(context, |response| {
+                            response
+                                .interaction_response_data(|message| {
+                                    if let Err(why) = Command::new("cargo").arg("run").spawn() {
+                                        message
+                                            .content(format!(
+                                                "failed to restart sorry. error {:?}",
+                                                why
+                                            ))
+                                            .ephemeral(true)
+                                    } else {
+                                        should_shut_down = true;
+                                        message.content("Restarting the bot").ephemeral(true)
+                                    }
+                                })
+                                .kind(InteractionResponseType::ChannelMessageWithSource)
+                        })
+                        .await
+                        .expect("bozo failure");
 
-                if should_shut_down {
-                    std::process::exit(0);
-                }
-            }
+                    if should_shut_down {
+                        std::process::exit(0);
+                    }
+                },
+                &_ => todo!()
+            };
         }
     }
 }
