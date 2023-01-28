@@ -1,15 +1,21 @@
-use serenity::model::application::interaction::Interaction;
-use serenity::model::application::interaction::InteractionResponseType;
-use serenity::model::channel::Message;
-use serenity::model::gateway::Ready;
-use serenity::model::id::UserId;
-use serenity::model::prelude::GuildId;
-use serenity::prelude as discord;
+use serenity::{
+    client::{Client, Context, EventHandler as DiscordEventHandler},
+    model::{
+        application::interaction::{Interaction, InteractionResponseType},
+        channel::Message,
+        gateway::Ready,
+        id::UserId,
+        prelude::GuildId,
+    },
+    prelude::GatewayIntents,
+};
 
 use std::process::Command;
 use tokio::sync::Mutex;
 
 const MAIN_SERVER: GuildId = GuildId(973716864301678702);
+
+// static COMMANDS: HashMap<&str, Fn(ApplicationCommandInteraction)> = HashMap::new();
 
 #[derive(Default)]
 struct Bot {
@@ -21,8 +27,8 @@ struct EventHandler {
 }
 
 #[serenity::async_trait]
-impl discord::EventHandler for EventHandler {
-    async fn ready(&self, context: discord::Context, ready: Ready) {
+impl DiscordEventHandler for EventHandler {
+    async fn ready(&self, context: Context, ready: Ready) {
         println!("[INFO]: The bot has logged on as {}", ready.user.name);
 
         let mut bot = self.bot.lock().await;
@@ -42,7 +48,7 @@ impl discord::EventHandler for EventHandler {
             .expect("Failed to register application commands for main server.");
     }
 
-    async fn message(&self, context: discord::Context, message: Message) {
+    async fn message(&self, context: Context, message: Message) {
         println!("[MESSAGE]: {}", message.content);
 
         let bot = self.bot.lock().await;
@@ -73,12 +79,15 @@ impl discord::EventHandler for EventHandler {
                 })
                 .await
             {
-                println!("[ERROR]: Failed to send a message. Here's why:\n{:?}", error);
+                println!(
+                    "[ERROR]: Failed to send a message. Here's why:\n{:?}",
+                    error
+                );
             }
         }
     }
 
-    async fn interaction_create(&self, context: discord::Context, interaction: Interaction) {
+    async fn interaction_create(&self, context: Context, interaction: Interaction) {
         if let Interaction::ApplicationCommand(command) = interaction {
             if command.data.name == "restart" {
                 let mut should_shut_down = false;
@@ -116,15 +125,14 @@ impl discord::EventHandler for EventHandler {
 async fn main() {
     let token = std::fs::read_to_string("user/token.txt").expect("Failed to load the token file.");
 
-    let intents = discord::GatewayIntents::GUILDS
-        | discord::GatewayIntents::GUILD_MESSAGES
-        | discord::GatewayIntents::MESSAGE_CONTENT;
+    let intents =
+        GatewayIntents::GUILDS | GatewayIntents::GUILD_MESSAGES | GatewayIntents::MESSAGE_CONTENT;
 
     let event_handler = EventHandler {
         bot: Mutex::new(Bot::default()),
     };
 
-    let mut bot = discord::Client::builder(&token, intents)
+    let mut bot = Client::builder(&token, intents)
         .event_handler(event_handler)
         .await
         .expect("Failed to create the client. Perhaps the token wasn't valid?");
