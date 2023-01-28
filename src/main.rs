@@ -2,7 +2,7 @@ use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
     model::{
         application::interaction::Interaction, channel::Message, gateway::Ready, id::UserId,
-        prelude::GuildId,
+        prelude::{GuildId, command::CommandOptionType},
     },
     prelude::GatewayIntents,
 };
@@ -78,6 +78,25 @@ impl DiscordEventHandler for EventHandler {
                         .name("restart")
                         .description("Restarts the bot. Can only be used by developer.")
                 })
+                .create_application_command(|command| {
+                    command
+                        .name("dm")
+                        .description("DMs somebody. duh.")
+                        .create_option(|option| {
+                            option
+                                .name("member")
+                                .description("The member that you want to DM")
+                                .kind(CommandOptionType::User)
+                                .required(true)
+                        })
+                        .create_option(|option| {
+                            option
+                                .name("message")
+                                .description("The message that you want to DM to that person.")
+                                .kind(CommandOptionType::String)
+                                .required(true)
+                        })
+                })
             })
             .await
             .expect("Failed to register application commands for main server.");
@@ -87,6 +106,7 @@ impl DiscordEventHandler for EventHandler {
         if let Interaction::ApplicationCommand(command) = interaction {
             match command.data.name.as_str() {
                 "restart" => commands::restart(context, command).await,
+                "dm" => commands::dm(context, command).await,
                 &_ => todo!(),
             };
         }
