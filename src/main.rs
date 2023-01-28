@@ -1,16 +1,12 @@
 use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
     model::{
-        application::interaction::{Interaction, InteractionResponseType},
-        channel::Message,
-        gateway::Ready,
-        id::UserId,
-        prelude::{GuildId},
+        application::interaction::Interaction, channel::Message, gateway::Ready, id::UserId,
+        prelude::GuildId,
     },
     prelude::GatewayIntents,
 };
 
-use std::process::Command;
 use tokio::sync::Mutex;
 
 mod commands;
@@ -91,7 +87,7 @@ impl DiscordEventHandler for EventHandler {
         if let Interaction::ApplicationCommand(command) = interaction {
             match command.data.name.as_str() {
                 "restart" => commands::restart(context, command).await,
-                &_ => todo!()
+                &_ => todo!(),
             };
         }
     }
