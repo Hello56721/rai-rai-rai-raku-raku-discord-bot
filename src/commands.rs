@@ -2,7 +2,6 @@ use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::application_command::CommandDataOptionValue;
 use serenity::model::application::interaction::InteractionResponseType;
-use serenity::model::guild::Member as GuildMember;
 
 use std::process::Command;
 
