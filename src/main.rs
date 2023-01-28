@@ -65,6 +65,16 @@ impl discord::EventHandler for EventHandler {
                     error
                 )
             }
+        } else if message.content.to_lowercase().starts_with("interesting") {
+            if let Err(error) = message
+                .channel_id
+                .send_message(context, |m| {
+                    m.content("@everyone check out wut dis guys interested in")
+                })
+                .await
+            {
+                println!("[ERROR]: Failed to send a message. Here's why:\n{:?}", error);
+            }
         }
     }
 
