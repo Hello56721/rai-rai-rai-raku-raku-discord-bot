@@ -5,7 +5,7 @@ use serenity::{
         channel::Message,
         gateway::Ready,
         id::UserId,
-        prelude::{command, GuildId},
+        prelude::{GuildId},
     },
     prelude::GatewayIntents,
 };
@@ -13,9 +13,9 @@ use serenity::{
 use std::process::Command;
 use tokio::sync::Mutex;
 
-const MAIN_SERVER: GuildId = GuildId(973716864301678702);
+mod commands;
 
-// static COMMANDS: HashMap<&str, Fn(ApplicationCommandInteraction)> = HashMap::new();
+const MAIN_SERVER: GuildId = GuildId(973716864301678702);
 
 #[derive(Default)]
 struct Bot {
@@ -90,34 +90,7 @@ impl DiscordEventHandler for EventHandler {
     async fn interaction_create(&self, context: Context, interaction: Interaction) {
         if let Interaction::ApplicationCommand(command) = interaction {
             match command.data.name.as_str() {
-                "restart" => {
-                    let mut should_shut_down = false;
-
-                    command
-                        .create_interaction_response(context, |response| {
-                            response
-                                .interaction_response_data(|message| {
-                                    if let Err(why) = Command::new("cargo").arg("run").spawn() {
-                                        message
-                                            .content(format!(
-                                                "failed to restart sorry. error {:?}",
-                                                why
-                                            ))
-                                            .ephemeral(true)
-                                    } else {
-                                        should_shut_down = true;
-                                        message.content("Restarting the bot").ephemeral(true)
-                                    }
-                                })
-                                .kind(InteractionResponseType::ChannelMessageWithSource)
-                        })
-                        .await
-                        .expect("bozo failure");
-
-                    if should_shut_down {
-                        std::process::exit(0);
-                    }
-                },
+                "restart" => commands::restart(context, command).await,
                 &_ => todo!()
             };
         }
