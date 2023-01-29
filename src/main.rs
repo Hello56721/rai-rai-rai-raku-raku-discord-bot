@@ -2,7 +2,7 @@ use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
     model::{
         application::interaction::Interaction, channel::Message, gateway::Ready, id::UserId,
-        prelude::{command::CommandOptionType},
+        prelude::command::CommandOptionType,
     },
     prelude::GatewayIntents,
 };
@@ -22,6 +22,15 @@ struct EventHandler {
     bot: Mutex<Bot>,
 }
 
+async fn reply_to_message(context: &Context, message: &Message, reply: &str) {
+    if let Err(error) = message.reply(context.clone(), reply).await {
+        eprintln!(
+            "[ERROR]: Failed to reply to a message. Here's why:\n{:?}",
+            error
+        );
+    }
+}
+
 #[serenity::async_trait]
 impl DiscordEventHandler for EventHandler {
     async fn message(&self, context: Context, message: Message) {
@@ -33,33 +42,29 @@ impl DiscordEventHandler for EventHandler {
         } else {
             String::new()
         };
-        
-        println!("[MESSAGE]: {} {{{}}} -> # {}", message.author.name, message.content, channel_name);
+
+        println!(
+            "[MESSAGE]: {} {{{}}} -> # {}",
+            message.author.name, message.content, channel_name
+        );
 
         let bot = self.bot.lock().await;
-
+        
+        // Prevent the bot from responding to it's own messages
         if bot.id == message.author.id {
             return;
         }
+        
+        let lowercase_message = message.content.to_lowercase();
 
         if message.content.starts_with("I am") {
-            if let Err(why) = message.reply_ping(context, "fuk yo").await {
-                println!(
-                    "[ERROR]: Failed to reply to a message. Here's why:\n{:?}",
-                    why
-                );
-            }
-        } else if message.content.to_lowercase().starts_with("indeed") {
-            if let Err(error) = message.reply_ping(context, "indeedn't").await {
-                println!(
-                    "[ERROR]: Failed to reply to a message. Here's why:\n{:?}",
-                    error
-                )
-            }
-        } else if message.content.to_lowercase().starts_with("interesting") {
+            reply_to_message(&context, &message, "fuk you").await;
+        } else if lowercase_message.starts_with("indeed") {
+            reply_to_message(&context, &message, "indeedn't").await;
+        } else if lowercase_message.starts_with("interesting") {
             if let Err(error) = message
                 .channel_id
-                .send_message(context, |m| {
+                .send_message(context.clone(), |m| {
                     m.content("@everyone check out wut dis guys interested in")
                 })
                 .await
@@ -69,6 +74,22 @@ impl DiscordEventHandler for EventHandler {
                     error
                 );
             }
+        }
+
+        if lowercase_message.contains("shut") {
+            reply_to_message(&context, &message, "no, u shut up").await;
+        }
+        
+        if lowercase_message.contains("cring") {
+            reply_to_message(&context, &message, "cringe indeed").await;
+        }
+        
+        if lowercase_message.contains("bruh") {
+            reply_to_message(&context, &message, "https://tenor.com/view/bruh424019499-gif-25675566").await;
+        }
+        
+        if lowercase_message.contains("communis") || lowercase_message.contains("capital") {
+            reply_to_message(&context, &message, "https://tenor.com/view/communism-gif-25912464").await;
         }
     }
 
