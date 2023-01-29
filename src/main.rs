@@ -1,11 +1,8 @@
 use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
     model::{
-        application::interaction::Interaction,
-        channel::Message,
-        gateway::Ready,
-        id::UserId,
-        prelude::{command::CommandOptionType},
+        application::interaction::Interaction, channel::Message, gateway::Ready, id::UserId,
+        prelude::command::CommandOptionType,
     },
     prelude::GatewayIntents,
 };
@@ -13,6 +10,8 @@ use serenity::{
 use tokio::sync::Mutex;
 
 mod commands;
+
+const OWNER_ID: u64 = 650439182204010496;
 
 #[derive(Default)]
 struct Bot {
@@ -69,6 +68,10 @@ impl DiscordEventHandler for EventHandler {
 
         let mut bot = self.bot.lock().await;
         bot.id = ready.user.id;
+
+        context.set_activity(serenity::model::gateway::Activity::listening(
+            "bullshit :joy_cat:",
+        )).await;
 
         for guild in ready.user.guilds(context.clone()).await.unwrap() {
             println!("[INFO]: Adding commands for {}", guild.name);
