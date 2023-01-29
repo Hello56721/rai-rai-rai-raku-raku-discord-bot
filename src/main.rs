@@ -88,6 +88,10 @@ impl DiscordEventHandler for EventHandler {
             reply_to_message(&context, &message, "https://tenor.com/view/bruh424019499-gif-25675566").await;
         }
         
+        if lowercase_message.contains("damn") {
+            reply_to_message(&context, &message, "https://tenor.com/view/damn-gif-24598826").await;
+        }
+        
         if lowercase_message.contains("communis") || lowercase_message.contains("capital") {
             reply_to_message(&context, &message, "https://tenor.com/view/communism-gif-25912464").await;
         }
