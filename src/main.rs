@@ -2,7 +2,7 @@ use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
     model::{
         application::interaction::Interaction, channel::Message, gateway::Ready, id::UserId,
-        prelude::command::CommandOptionType,
+        prelude::{command::CommandOptionType},
     },
     prelude::GatewayIntents,
 };
@@ -25,7 +25,16 @@ struct EventHandler {
 #[serenity::async_trait]
 impl DiscordEventHandler for EventHandler {
     async fn message(&self, context: Context, message: Message) {
-        println!("[MESSAGE]: {}", message.content);
+        let channel = message.channel(context.clone()).await.unwrap();
+        let channel_name = if let Some(private_channel) = channel.clone().private() {
+            private_channel.recipient.name
+        } else if let Some(guild_channel) = channel.clone().guild() {
+            guild_channel.name
+        } else {
+            String::new()
+        };
+        
+        println!("[MESSAGE]: {} {{{}}} -> # {}", message.author.name, message.content, channel_name);
 
         let bot = self.bot.lock().await;
 
@@ -69,9 +78,11 @@ impl DiscordEventHandler for EventHandler {
         let mut bot = self.bot.lock().await;
         bot.id = ready.user.id;
 
-        context.set_activity(serenity::model::gateway::Activity::listening(
-            "bullshit :joy_cat:",
-        )).await;
+        context
+            .set_activity(serenity::model::gateway::Activity::listening(
+                "bullshit :joy_cat:",
+            ))
+            .await;
 
         for guild in ready.user.guilds(context.clone()).await.unwrap() {
             println!("[INFO]: Adding commands for {}", guild.name);
@@ -126,8 +137,10 @@ impl DiscordEventHandler for EventHandler {
 async fn main() {
     let token = std::fs::read_to_string("user/token.txt").expect("Failed to load the token file.");
 
-    let intents =
-        GatewayIntents::GUILDS | GatewayIntents::GUILD_MESSAGES | GatewayIntents::MESSAGE_CONTENT;
+    let intents = GatewayIntents::GUILDS
+        | GatewayIntents::GUILD_MESSAGES
+        | GatewayIntents::MESSAGE_CONTENT
+        | GatewayIntents::DIRECT_MESSAGES;
 
     let event_handler = EventHandler {
         bot: Mutex::new(Bot::default()),
