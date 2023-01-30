@@ -56,44 +56,17 @@ impl DiscordEventHandler for EventHandler {
         }
         
         let lowercase_message = message.content.to_lowercase();
-
-        if message.content.starts_with("I am") {
-            reply_to_message(&context, &message, "fuk you").await;
-        } else if lowercase_message.starts_with("indeed") {
-            reply_to_message(&context, &message, "indeedn't").await;
-        } else if lowercase_message.starts_with("interesting") {
-            if let Err(error) = message
-                .channel_id
-                .send_message(context.clone(), |m| {
-                    m.content("@everyone check out wut dis guys interested in")
-                })
-                .await
-            {
-                println!(
-                    "[ERROR]: Failed to send a message. Here's why:\n{:?}",
-                    error
-                );
-            }
-        }
-
-        if lowercase_message.contains("shut") {
-            reply_to_message(&context, &message, "no, u shut up").await;
-        }
-        
-        if lowercase_message.contains("cring") {
-            reply_to_message(&context, &message, "cringe indeed").await;
-        }
-        
-        if lowercase_message.contains("bruh") {
-            reply_to_message(&context, &message, "https://tenor.com/view/bruh424019499-gif-25675566").await;
-        }
-        
-        if lowercase_message.contains("damn") {
-            reply_to_message(&context, &message, "https://tenor.com/view/damn-gif-24598826").await;
-        }
         
         if lowercase_message.contains("communis") || lowercase_message.contains("capital") {
             reply_to_message(&context, &message, "https://tenor.com/view/communism-gif-25912464").await;
+        }
+        
+        if lowercase_message.contains("stalin") {
+            reply_to_message(&context, &message, "https://tenor.com/view/stalin-joseph-stalin-joseph-stalin-mustache-stalin-mustache-gif-26062132").await;
+        }
+        
+        if lowercase_message.contains("mao") || lowercase_message.contains("chairman") {
+            reply_to_message(&context, &message, "https://tenor.com/view/mao-gif-25413392").await;
         }
     }
 
