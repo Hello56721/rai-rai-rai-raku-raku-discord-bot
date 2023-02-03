@@ -114,6 +114,18 @@ impl DiscordEventHandler for EventHandler {
                                         .required(true)
                                 })
                         })
+                        .create_application_command(|command| {
+                            command
+                                .name("ghostping")
+                                .description("Ping someone and quickly delete the ping.")
+                                .create_option(|option| {
+                                    option
+                                        .name("user")
+                                        .description("The person that would like to ghost ping")
+                                        .kind(CommandOptionType::User)
+                                        .required(true)
+                                })
+                        })
                 })
                 .await
                 .expect("Failed to register application commands for main server.");
@@ -125,6 +137,7 @@ impl DiscordEventHandler for EventHandler {
             match command.data.name.as_str() {
                 "restart" => commands::restart(context, command).await,
                 "dm" => commands::dm(context, command).await,
+                "ghostping" => commands::ghostping(context, command).await,
                 &_ => todo!(),
             };
         }

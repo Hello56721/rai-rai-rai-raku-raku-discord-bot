@@ -93,3 +93,15 @@ pub async fn dm(context: Context, command: ApplicationCommandInteraction) {
         }
     }
 }
+
+pub async fn ghostping(context: Context, command: ApplicationCommandInteraction) {
+    let result = command.create_interaction_response(context, |response_data| {
+        response_data.interaction_response_data(|response_data| {
+            response_data.content("bogo this command isn't implemented yet.")
+        })
+    }).await;
+    
+    if let Err(error) = result {
+        eprintln!("[ERROR]: Failed to respond to ghostping command. Here's why:\n{:?}", error);
+    }
+}
