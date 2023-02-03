@@ -95,13 +95,47 @@ pub async fn dm(context: Context, command: ApplicationCommandInteraction) {
 }
 
 pub async fn ghostping(context: Context, command: ApplicationCommandInteraction) {
-    let result = command.create_interaction_response(context, |response_data| {
-        response_data.interaction_response_data(|response_data| {
-            response_data.content("bogo this command isn't implemented yet.")
+    let user = command.data.options[0].resolved.as_ref().unwrap();
+
+    let (response, ephemeral) = async {
+        if let CommandDataOptionValue::User(user, _member) = user {
+            let result = command
+                .channel_id
+                .send_message(context.clone(), |message| {
+                    message.content(format!("<@{}>", user.id.0))
+                })
+                .await;
+            
+            match result {
+                Err(_) => (format!("<@{}>", user.id.0), false),
+                Ok(message) => {
+                    if let Err(error) = message.delete(context.clone()).await {
+                        eprintln!(
+                            "[ERROR]: Failed to delete a message. Here's why:\n{:?}",
+                            error
+                        );
+                    }
+                    
+                    ("ok boomer".to_string(), true)
+                }
+            }
+        } else {
+            ("u need to tell me who 2 ghostping dumbass".to_string(), false)
+        }
+    }.await;
+
+    let result = command
+        .create_interaction_response(context.clone(), |response_data| {
+            response_data.interaction_response_data(|response_data| {
+                response_data.content(&response).ephemeral(ephemeral)
+            })
         })
-    }).await;
-    
+        .await;
+
     if let Err(error) = result {
-        eprintln!("[ERROR]: Failed to respond to ghostping command. Here's why:\n{:?}", error);
+        eprintln!(
+            "[ERROR]: Failed to respond to ghostping command. Here's why:\n{:?}",
+            error
+        );
     }
 }
