@@ -126,6 +126,11 @@ impl DiscordEventHandler for EventHandler {
                                         .required(true)
                                 })
                         })
+                        .create_application_command(|command| {
+                            command
+                                .name("youtube")
+                                .description("Prints the link to a random YouTube video")
+                        })
                 })
                 .await
                 .expect("Failed to register application commands for main server.");
@@ -138,6 +143,7 @@ impl DiscordEventHandler for EventHandler {
                 "restart" => commands::restart(context, command).await,
                 "dm" => commands::dm(context, command).await,
                 "ghostping" => commands::ghostping(context, command).await,
+                "youtube" => commands::youtube(context, command).await,
                 &_ => todo!(),
             };
         }
