@@ -105,7 +105,7 @@ pub async fn ghostping(context: Context, command: ApplicationCommandInteraction)
                     message.content(format!("<@{}>", user.id.0))
                 })
                 .await;
-            
+
             match result {
                 Err(_) => (format!("<@{}>", user.id.0), false),
                 Ok(message) => {
@@ -115,14 +115,18 @@ pub async fn ghostping(context: Context, command: ApplicationCommandInteraction)
                             error
                         );
                     }
-                    
+
                     ("ok boomer".to_string(), true)
                 }
             }
         } else {
-            ("u need to tell me who 2 ghostping dumbass".to_string(), false)
+            (
+                "u need to tell me who 2 ghostping dumbass".to_string(),
+                false,
+            )
         }
-    }.await;
+    }
+    .await;
 
     let result = command
         .create_interaction_response(context.clone(), |response_data| {
@@ -138,4 +142,29 @@ pub async fn ghostping(context: Context, command: ApplicationCommandInteraction)
             error
         );
     }
+}
+
+pub async fn youtube(context: Context, command: ApplicationCommandInteraction) {
+    let response = reqwest::get("https://petittube.com/index.php").await;
+    if response.is_err() {
+        let result = command
+            .create_interaction_response(context.clone(), |response_data| {
+                response_data.interaction_response_data(|response_data| {
+                    response_data.content("something went wrong sorry")
+                })
+            })
+            .await;
+        
+        if let Err(error) = result {
+            eprintln!("[ERROR]: Failed to respond to youtube command. Here's why:\n{:?}",
+            error);
+        }
+
+        return;
+    }
+    
+    let response = response.unwrap();
+    let html = response.text().await.unwrap();
+    
+    println!("{}", html);
 }
