@@ -1,9 +1,9 @@
 use scraper::Selector;
-use serenity::Error;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::application_command::CommandDataOptionValue;
 use serenity::model::application::interaction::InteractionResponseType;
+use serenity::Error;
 
 use scraper::Html;
 
@@ -11,12 +11,16 @@ use std::process::Command;
 
 use super::OWNER_ID;
 
-async fn respond_with_content(context: Context, command: &ApplicationCommandInteraction, content: &str) -> Result<(), Error> {
-    command.create_interaction_response(context, |response_data| {
-        response_data.interaction_response_data(|response_data| {
-            response_data.content(content)
+async fn respond_with_content(
+    context: Context,
+    command: &ApplicationCommandInteraction,
+    content: &str,
+) -> Result<(), Error> {
+    command
+        .create_interaction_response(context, |response_data| {
+            response_data.interaction_response_data(|response_data| response_data.content(content))
         })
-    }).await
+        .await
 }
 
 pub async fn restart(context: Context, command: ApplicationCommandInteraction) {
@@ -159,34 +163,48 @@ pub async fn ghostping(context: Context, command: ApplicationCommandInteraction)
 pub async fn youtube(context: Context, command: ApplicationCommandInteraction) {
     let response = reqwest::get("https://petittube.com/index.php").await;
     if response.is_err() {
-        let result = respond_with_content(context, &command, "sorry something went wrong").await;
-        
+        let result =
+            respond_with_content(context.clone(), &command, "sorry something went wrong").await;
+
         if let Err(error) = result {
-            eprintln!("[ERROR]: Failed to respond to youtube command. Here's why:\n{:?}",
-            error);
+            eprintln!(
+                "[ERROR]: Failed to respond to youtube command. Here's why:\n{:?}",
+                error
+            );
         }
 
         return;
     }
-    
     let response = response.unwrap();
     let html = response.text().await.unwrap();
-    
-    let document = Html::parse_document(&html);
-    let selector = Selector::parse("iframe").unwrap();
-    let iframe = document.select(&selector).find(|iframe| {
-        if let Some(src) = iframe.value().attr("src") {
-            src.starts_with("https://www.youtube.com/embed/")
-        } else {
-            false
-        }
-    }).unwrap().value();
-    
-    let url = iframe.attr("src").unwrap();
-    let code = &url[30..42];
-    
-    let result = respond_with_content(context, &command, code.to_owned().as_str()).await;
+
+    let result = command.create_interaction_response(context, |response_data| {
+        response_data.interaction_response_data(|response_data| {
+            let document = Html::parse_document(&html);
+            let selector = Selector::parse("iframe").unwrap();
+            let iframe = document
+                .select(&selector)
+                .find(|iframe| {
+                    if let Some(src) = iframe.value().attr("src") {
+                        src.starts_with("https://www.youtube.com/embed/")
+                    } else {
+                        false
+                    }
+                })
+                .unwrap()
+                .value();
+
+            let url = iframe.attr("src").unwrap();
+            let code = &url[30..41];
+
+            response_data.content(code)
+        })
+    }).await;
+
     if let Err(error) = result {
-        eprintln!("[ERROR]: Failed to respond to youtube command. Here's why:\n{:?}", error);
+        eprintln!(
+            "[ERROR]: Failed to respond to youtube command. Here's why:\n{:?}",
+            error
+        );
     }
 }
