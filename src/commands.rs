@@ -195,9 +195,8 @@ pub async fn youtube(context: Context, command: ApplicationCommandInteraction) {
                 .value();
 
             let url = iframe.attr("src").unwrap();
-            let code = &url[30..41];
 
-            response_data.content(code)
+            response_data.content(url)
         })
     }).await;
 
