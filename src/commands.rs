@@ -88,7 +88,7 @@ pub async fn dm(context: Context, command: ApplicationCommandInteraction) {
                     if let Err(_) = result {
                         format!("cant dm {} :pouting_cat:", user.name)
                     } else {
-                        "done :can_pooper:".to_string()
+                        "done <:can_pooper:1079210431471681700>".to_string()
                     }
                 } else {
                     String::new()
