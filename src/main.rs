@@ -49,24 +49,42 @@ impl DiscordEventHandler for EventHandler {
         );
 
         let bot = self.bot.lock().await;
-        
+
         // Prevent the bot from responding to it's own messages
         if bot.id == message.author.id {
             return;
         }
-        
+
         let lowercase_message = message.content.to_lowercase();
-        
-        if lowercase_message.contains("communis") || lowercase_message.contains("capital") {
-            reply_to_message(&context, &message, "https://tenor.com/view/communism-gif-25912464").await;
+
+        if lowercase_message.contains("indeed") {
+            message
+                .channel_id
+                .send_message(context.clone(), |message| message.content("Indeed."))
+                .await
+                .unwrap();
         }
-        
+
+        if lowercase_message.contains("communis") || lowercase_message.contains("capital") {
+            reply_to_message(
+                &context,
+                &message,
+                "https://tenor.com/view/communism-gif-25912464",
+            )
+            .await;
+        }
+
         if lowercase_message.contains("stalin") {
             reply_to_message(&context, &message, "https://tenor.com/view/stalin-joseph-stalin-joseph-stalin-mustache-stalin-mustache-gif-26062132").await;
         }
-        
+
         if lowercase_message.contains("mao") || lowercase_message.contains("chairman") {
-            reply_to_message(&context, &message, "https://tenor.com/view/mao-gif-25413392").await;
+            reply_to_message(
+                &context,
+                &message,
+                "https://tenor.com/view/mao-gif-25413392",
+            )
+            .await;
         }
     }
 
