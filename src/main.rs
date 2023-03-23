@@ -2,9 +2,9 @@ use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
     model::{
         application::interaction::Interaction, channel::Message, gateway::Ready, id::UserId,
-        prelude::command::CommandOptionType,
+        prelude::command::CommandOptionType, prelude::*,
     },
-    prelude::GatewayIntents,
+    prelude::*,
 };
 
 use tokio::sync::Mutex;
@@ -29,6 +29,16 @@ async fn reply_to_message(context: &Context, message: &Message, reply: &str) {
             error
         );
     }
+}
+
+async fn send_message(
+    context: &Context,
+    channel: &ChannelId,
+    p_message: &str,
+) -> Result<Message, SerenityError> {
+    channel
+        .send_message(context.clone(), |message| message.content(p_message))
+        .await
 }
 
 #[serenity::async_trait]
@@ -58,11 +68,9 @@ impl DiscordEventHandler for EventHandler {
         let lowercase_message = message.content.to_lowercase();
 
         if lowercase_message.contains("indeed") {
-            message
-                .channel_id
-                .send_message(context.clone(), |message| message.content("Indeed."))
-                .await
-                .unwrap();
+            if let Err(error) = send_message(&context, &message.channel_id, "Indeed.").await {
+                eprintln!("[ERROR]: {:?}", error);
+            }
         }
 
         if lowercase_message.contains("communis") || lowercase_message.contains("capital") {
