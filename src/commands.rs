@@ -178,27 +178,29 @@ pub async fn youtube(context: Context, command: ApplicationCommandInteraction) {
     let response = response.unwrap();
     let html = response.text().await.unwrap();
 
-    let result = command.create_interaction_response(context, |response_data| {
-        response_data.interaction_response_data(|response_data| {
-            let document = Html::parse_document(&html);
-            let selector = Selector::parse("iframe").unwrap();
-            let iframe = document
-                .select(&selector)
-                .find(|iframe| {
-                    if let Some(src) = iframe.value().attr("src") {
-                        src.starts_with("https://www.youtube.com/embed/")
-                    } else {
-                        false
-                    }
-                })
-                .unwrap()
-                .value();
+    let result = command
+        .create_interaction_response(context, |response_data| {
+            response_data.interaction_response_data(|response_data| {
+                let document = Html::parse_document(&html);
+                let selector = Selector::parse("iframe").unwrap();
+                let iframe = document
+                    .select(&selector)
+                    .find(|iframe| {
+                        if let Some(src) = iframe.value().attr("src") {
+                            src.starts_with("https://www.youtube.com/embed/")
+                        } else {
+                            false
+                        }
+                    })
+                    .unwrap()
+                    .value();
 
-            let url = iframe.attr("src").unwrap();
+                let url = iframe.attr("src").unwrap();
 
-            response_data.content(url)
+                response_data.content(url)
+            })
         })
-    }).await;
+        .await;
 
     if let Err(error) = result {
         eprintln!(
