@@ -6,7 +6,7 @@ use serenity::{
     },
     prelude::*,
 };
-
+use rand::prelude::*;
 use tokio::sync::Mutex;
 
 mod commands;
@@ -62,6 +62,11 @@ impl DiscordEventHandler for EventHandler {
 
         // Prevent the bot from responding to it's own messages
         if bot.id == message.author.id {
+            return;
+        }
+
+        // Have a 50/50 chance of responding to bots
+        if message.author.bot && rand::random() {
             return;
         }
 
