@@ -6,7 +6,6 @@ use serenity::{
     },
     prelude::*,
 };
-use rand::prelude::*;
 use tokio::sync::Mutex;
 
 mod commands;
