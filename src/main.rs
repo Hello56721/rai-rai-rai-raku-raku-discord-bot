@@ -67,7 +67,7 @@ impl DiscordEventHandler for EventHandler {
 
         let lowercase_message = message.content.to_lowercase();
 
-        if lowercase_message.contains("indeed") {
+        if lowercase_message.contains("indeed") || lowercase_message.contains("interesting") {
             if let Err(error) = send_message(&context, &message.channel_id, "Indeed.").await {
                 eprintln!("[ERROR]: {:?}", error);
             }
