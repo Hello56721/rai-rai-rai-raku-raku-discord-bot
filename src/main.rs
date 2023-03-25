@@ -64,8 +64,11 @@ impl DiscordEventHandler for EventHandler {
             return;
         }
 
-        // Have a 50/50 chance of responding to bots
-        if message.author.bot && rand::random() {
+        // Determines whether to respond or not.
+        let should_respond = !(rand::random() && rand::random() && rand::random() && rand::random());
+
+        // Have a 1/4 chance of not responding to a bot.
+        if message.author.bot && should_respond {
             return;
         }
 
