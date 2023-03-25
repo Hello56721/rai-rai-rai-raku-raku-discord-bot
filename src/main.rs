@@ -2,7 +2,7 @@ use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
     model::{
         application::interaction::Interaction, channel::Message, gateway::Ready, id::UserId,
-        prelude::command::CommandOptionType, prelude::*,
+        prelude::command::CommandOptionType, prelude::*, event::MessageUpdateEvent
     },
     prelude::*,
 };
@@ -93,6 +93,17 @@ impl DiscordEventHandler for EventHandler {
                 "https://tenor.com/view/mao-gif-25413392",
             )
             .await;
+        }
+    }
+
+    async fn message_update(&self, ctx: Context, new_data: MessageUpdateEvent) {
+        if let Some(content) = new_data.content {
+            let content = content.to_lowercase();
+            if content.contains("indeed") || content.contains("interesting") {
+                if let Err(error) = send_message(&ctx, &new_data.channel_id, "Indeed.").await {
+                    eprintln!("[ERROR]: {:?}", error);
+                }
+            }
         }
     }
 
