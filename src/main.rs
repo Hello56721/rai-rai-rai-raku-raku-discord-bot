@@ -114,8 +114,8 @@ impl DiscordEventHandler for EventHandler {
         bot.id = ready.user.id;
 
         context
-            .set_activity(serenity::model::gateway::Activity::listening(
-                "bullshit :joy_cat:",
+            .set_activity(serenity::model::gateway::Activity::playing(
+                "neng's a girl btw",
             ))
             .await;
 
