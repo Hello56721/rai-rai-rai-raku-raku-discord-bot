@@ -55,6 +55,37 @@ pub async fn restart(context: Context, command: ApplicationCommandInteraction) {
     }
 }
 
+pub async fn shutdown(context: Context, command: ApplicationCommandInteraction) {
+        
+    let (should_shut_down, response_content) = if command.user.id != OWNER_ID {
+        (
+            false,
+            "sorry but i dont take orders from idiots like u".to_string(),
+        )
+    } else {
+        (true, "shutting down bot".to_string())
+    };
+
+    command
+        .create_interaction_response(context, |response| {
+            response
+                .interaction_response_data(|message| {
+                    if command.user.id == OWNER_ID {
+                        message.content(response_content).ephemeral(true)
+                    } else {
+                        message.content(response_content).ephemeral(false) // for completeness
+                    }
+                })
+                .kind(InteractionResponseType::ChannelMessageWithSource)
+        })
+        .await
+        .expect("bozo failure");
+
+    if should_shut_down {
+        std::process::exit(0);
+    }
+}
+
 pub async fn dm(context: Context, command: ApplicationCommandInteraction) {
     let user = command
         .data

@@ -136,6 +136,11 @@ impl DiscordEventHandler for EventHandler {
                         })
                         .create_application_command(|command| {
                             command
+                                .name("shutdown")
+                                .description("Shuts down the bot. Can only be used by developer.")
+                        })
+                        .create_application_command(|command| {
+                            command
                                 .name("dm")
                                 .description("DMs somebody. duh.")
                                 .create_option(|option| {
@@ -182,6 +187,7 @@ impl DiscordEventHandler for EventHandler {
         if let Interaction::ApplicationCommand(command) = interaction {
             match command.data.name.as_str() {
                 "restart" => commands::restart(context, command).await,
+                "shutdown" => commands::shutdown(context, command).await,
                 "dm" => commands::dm(context, command).await,
                 "ghostping" => commands::ghostping(context, command).await,
                 "youtube" => commands::youtube(context, command).await,
