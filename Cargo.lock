@@ -990,6 +990,7 @@ dependencies = [
 name = "rai-rai-raku-raku"
 version = "0.1.0"
 dependencies = [
+ "rand 0.8.5",
  "reqwest",
  "scraper",
  "serenity",
