@@ -122,7 +122,7 @@ impl DiscordEventHandler for EventHandler {
 
         context
             .set_activity(serenity::model::gateway::Activity::playing(
-                "neng's a girl btw",
+                "u cant escape life bozo",
             ))
             .await;
 
