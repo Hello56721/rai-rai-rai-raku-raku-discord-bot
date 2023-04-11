@@ -1,8 +1,9 @@
+use serde::{Deserialize, Serialize};
 use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
     model::{
-        application::interaction::Interaction, channel::Message, gateway::Ready, id::UserId,
-        prelude::command::CommandOptionType, prelude::*, event::MessageUpdateEvent
+        application::interaction::Interaction, channel::Message, event::MessageUpdateEvent,
+        gateway::Ready, id::UserId, prelude::command::CommandOptionType, prelude::*,
     },
     prelude::*,
 };
@@ -11,6 +12,52 @@ use tokio::sync::Mutex;
 mod commands;
 
 const OWNER_ID: u64 = 650439182204010496;
+
+// The free ChatGPT endpoint
+const CHATGPT_API: &str = "https://free.churchless.tech/v1/chat/completions";
+
+#[derive(Serialize, Deserialize)]
+struct GPTMessage {
+    role: String,
+    content: String,
+}
+
+// The structure of the payload to send.
+#[derive(Serialize)]
+struct GPTPayload {
+    frequency_penalty: i32,
+    max_tokens: Option<i32>,
+    messages: Vec<GPTMessage>,
+    model: String,
+    presence_penalty: i32,
+    stream: bool,
+    temperature: i32,
+    top_p: i32,
+}
+
+#[derive(Deserialize)]
+struct GPTChoice {
+    index: i32,
+    message: GPTMessage,
+    finish_reason: String,
+}
+
+#[derive(Deserialize)]
+struct GPTUsage {
+    prompt_tokens: i32,
+    completion_tokens: i32,
+    total_tokens: i32,
+}
+
+#[derive(Deserialize)]
+struct GPTResponse {
+    id: String,
+    object: String,
+    created: i32,
+    model: String,
+    usage: GPTUsage,
+    choices: Vec<GPTChoice>,
+}
 
 #[derive(Default)]
 struct Bot {
@@ -40,6 +87,50 @@ async fn send_message(
         .await
 }
 
+// Get the GPT response to a message.
+async fn get_gpt_response(p_message: &str) -> String {
+    let payload = GPTPayload {
+        frequency_penalty: 0,
+        max_tokens: None,
+        messages: vec![GPTMessage {
+            role: "user".to_string(),
+            content: p_message.to_string(),
+        }],
+        model: "gpt-3.5-turbo".to_string(),
+        presence_penalty: 0,
+        stream: false,
+        temperature: 1,
+        top_p: 1,
+    };
+
+    let payload = serde_json::to_string(&payload).unwrap();
+
+    let client = reqwest::Client::new();
+    let result = client
+        .post(CHATGPT_API)
+        .body(payload)
+        .header("Content-Type", "application/json")
+        .send()
+        .await;
+
+    match result {
+        Err(error) => {
+            eprintln!("[ERROR]: {:?}", error);
+            "h".to_string()
+        }
+        Ok(result) => match result.text().await {
+            Err(error) => {
+                eprintln!("[ERROR]: {:?}", error);
+                "h".to_string()
+            }
+            Ok(result) => {
+                let response: GPTResponse = serde_json::from_str(&result).unwrap();
+                response.choices[0].message.content.clone()
+            }
+        },
+    }
+}
+
 #[serenity::async_trait]
 impl DiscordEventHandler for EventHandler {
     async fn message(&self, context: Context, message: Message) {
@@ -65,7 +156,8 @@ impl DiscordEventHandler for EventHandler {
         }
 
         // Determines whether to respond or not.
-        let should_respond = !(rand::random() && rand::random() && rand::random() && rand::random());
+        let should_respond =
+            !(rand::random() && rand::random() && rand::random() && rand::random());
 
         // Have a 1/4 chance of not responding to a bot.
         if message.author.bot && should_respond {
@@ -100,6 +192,12 @@ impl DiscordEventHandler for EventHandler {
                 "https://tenor.com/view/mao-gif-25413392",
             )
             .await;
+        }
+
+        if channel_name.trim() == "chatgpt" {
+            message.channel_id.broadcast_typing(&context.http).await.unwrap();
+            std::thread::sleep_ms(1000);
+            send_message(&context, &message.channel_id, &get_gpt_response(message.content.as_str()).await).await.unwrap();
         }
     }
 
@@ -207,6 +305,7 @@ async fn main() {
     let intents = GatewayIntents::GUILDS
         | GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT
+        | GatewayIntents::GUILD_MESSAGE_TYPING
         | GatewayIntents::DIRECT_MESSAGES;
 
     let event_handler = EventHandler {
