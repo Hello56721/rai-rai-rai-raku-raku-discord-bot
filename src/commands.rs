@@ -62,7 +62,7 @@ pub async fn shutdown(context: Context, command: ApplicationCommandInteraction) 
             "sorry but i dont take orders from idiots like u".to_string(),
         )
     } else {
-        (true, "shutting down".to_string())
+        (true, "shutting down bot".to_string())
     };
 
     command
