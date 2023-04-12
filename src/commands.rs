@@ -29,7 +29,7 @@ pub async fn restart(context: Context, command: ApplicationCommandInteraction) {
             false,
             "sorry but i dont take orders from idiots like u".to_string(),
         )
-    } else if let Err(why) = Command::new("cargo").arg("run").spawn() {
+    } else if let Err(why) = Command::new("cargo").arg("run").arg("--release").spawn() {
         (false, format!("failed to restart bot bc of {:?}", why))
     } else {
         (true, "restarting bot".to_string())
