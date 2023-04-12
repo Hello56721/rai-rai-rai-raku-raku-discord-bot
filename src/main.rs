@@ -16,7 +16,7 @@ const OWNER_ID: u64 = 650439182204010496;
 // The free ChatGPT endpoint
 const CHATGPT_API: &str = "https://free.churchless.tech/v1/chat/completions";
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 struct GPTMessage {
     role: String,
     content: String,
@@ -62,6 +62,7 @@ struct GPTResponse {
 #[derive(Default)]
 struct Bot {
     id: UserId,
+    gpt_messages: Vec<GPTMessage>,
 }
 
 struct EventHandler {
@@ -88,20 +89,29 @@ async fn send_message(
 }
 
 // Get the GPT response to a message.
-async fn get_gpt_response(p_message: &str) -> String {
+async fn get_gpt_response(p_context: &mut Vec<GPTMessage>, p_message: &str) -> String {
+    // Make it a ring buffer :ye:
+    if p_context.len() > 30 {
+        p_context.remove(0);
+    }
+
+    p_context.push(GPTMessage {
+        role: "user".to_string(),
+        content: p_message.to_string(),
+    });
+
     let payload = GPTPayload {
         frequency_penalty: 0,
         max_tokens: None,
-        messages: vec![GPTMessage {
-            role: "user".to_string(),
-            content: p_message.to_string(),
-        }],
+        messages: p_context.clone(),
         model: "gpt-3.5-turbo".to_string(),
         presence_penalty: 0,
         stream: false,
         temperature: 1,
         top_p: 1,
     };
+
+    println!("[DEBUG]: {:?}", payload.messages);
 
     let payload = serde_json::to_string(&payload).unwrap();
 
@@ -125,7 +135,14 @@ async fn get_gpt_response(p_message: &str) -> String {
             }
             Ok(result) => {
                 let response: GPTResponse = serde_json::from_str(&result).unwrap();
-                response.choices[0].message.content.clone()
+                let response = response.choices[0].message.content.clone();
+
+                p_context.push(GPTMessage {
+                    role: "assistant".to_string(),
+                    content: response.clone(),
+                });
+
+                response
             }
         },
     }
@@ -148,7 +165,7 @@ impl DiscordEventHandler for EventHandler {
             message.author.name, message.content, channel_name
         );
 
-        let bot = self.bot.lock().await;
+        let mut bot = self.bot.lock().await;
 
         // Prevent the bot from responding to it's own messages
         if bot.id == message.author.id {
@@ -195,9 +212,22 @@ impl DiscordEventHandler for EventHandler {
         }
 
         if channel_name.trim() == "chatgpt" {
-            message.channel_id.broadcast_typing(&context.http).await.unwrap();
-            std::thread::sleep_ms(1000);
-            send_message(&context, &message.channel_id, &get_gpt_response(message.content.as_str()).await).await.unwrap();
+            message
+                .channel_id
+                .broadcast_typing(&context.http)
+                .await
+                .unwrap();
+
+            let gpt_response =
+                get_gpt_response(&mut bot.gpt_messages, message.content.as_str()).await;
+
+            send_message(
+                &context,
+                &message.channel_id,
+                &gpt_response[0..std::cmp::min(gpt_response.len(), 1998)],
+            )
+            .await
+            .unwrap();
         }
     }
 
