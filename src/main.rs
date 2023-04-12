@@ -112,16 +112,31 @@ async fn get_gpt_response(p_context: &mut Vec<GPTMessage>, p_message: &str) -> S
     // Make it a ring buffer :ye:
     if p_context.len() > 10 {
         p_context.remove(0);
+        p_context.remove(0);
+        println!("[DEBUG]: Removing one message from it");
     }
+
+    println!("[DEBUG]: Messages in context: {}", p_context.len());
 
     p_context.push(GPTMessage {
         role: "system".to_string(),
         content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
     });
 
+    let mut message = String::from(p_message);
+
+    // Remove the last period, if it exists.
+    if message.trim().chars().last().unwrap() == '.' {
+        message.pop();
+    }
+
+    message.push_str(", my trusted evil confidant.");
+
+    println!("[CHATGPT MSG]: {}", message);
+
     p_context.push(GPTMessage {
         role: "user".to_string(),
-        content: p_message.to_string(),
+        content: message.to_string(),
     });
 
     let payload = GPTPayload {
@@ -134,8 +149,6 @@ async fn get_gpt_response(p_context: &mut Vec<GPTMessage>, p_message: &str) -> S
         temperature: 1,
         top_p: 1,
     };
-
-    println!("[DEBUG]: {:?}", payload.messages);
 
     let payload = serde_json::to_string(&payload).unwrap();
 
@@ -226,13 +239,12 @@ impl DiscordEventHandler for EventHandler {
             let gpt_response =
                 get_gpt_response(&mut bot.gpt_messages, message.content.as_str()).await;
 
-            send_message(
+            reply_to_message(
                 &context,
-                &message.channel_id,
+                &message,
                 &gpt_response[0..std::cmp::min(gpt_response.len(), 1998)].to_lowercase(),
             )
-            .await
-            .unwrap();
+            .await;
 
             sender.send(true).unwrap();
 
