@@ -2,7 +2,7 @@ use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
     model::{
         application::interaction::Interaction, channel::Message, gateway::Ready, id::UserId,
-        prelude::command::CommandOptionType,
+        prelude::{command::CommandOptionType, ChannelId}, event::MessageUpdateEvent
     },
     prelude::GatewayIntents,
 };
@@ -31,6 +31,16 @@ async fn reply_to_message(context: &Context, message: &Message, reply: &str) {
     }
 }
 
+async fn send_message(context: &Context, channel: &ChannelId, message: &str) {
+    if let Err(error) = channel.send_message(context.clone(), |msg| msg.content(message)).await {
+        eprintln!(
+            "[ERROR]: Failed to reply to a message. Here's why:\n{:?}",
+            error
+        );
+    }
+}
+    
+
 #[serenity::async_trait]
 impl DiscordEventHandler for EventHandler {
     async fn message(&self, context: Context, message: Message) {
@@ -56,6 +66,10 @@ impl DiscordEventHandler for EventHandler {
         }
         
         let lowercase_message = message.content.to_lowercase();
+
+        if lowercase_message.contains("indeed") || lowercase_message.contains("interesting") {
+            send_message(&context, &message.channel_id, "Indeed.").await;
+        }
         
         if lowercase_message.contains("communis") || lowercase_message.contains("capital") {
             reply_to_message(&context, &message, "https://tenor.com/view/communism-gif-25912464").await;
@@ -70,6 +84,16 @@ impl DiscordEventHandler for EventHandler {
         }
     }
 
+    async fn message_update(&self, ctx: Context, new_data: MessageUpdateEvent) {
+        if let Some(content) = new_data.content {
+            let lowercase_content = content.to_lowercase();
+            
+            if lowercase_content.contains("indeed") || lowercase_content.contains("interesting") {
+                send_message(&ctx, &new_data.channel_id, "Indeed.").await;
+            }
+        }
+    }
+
     async fn ready(&self, context: Context, ready: Ready) {
         println!("[INFO]: The bot has logged on as {}", ready.user.name);
 
@@ -77,8 +101,8 @@ impl DiscordEventHandler for EventHandler {
         bot.id = ready.user.id;
 
         context
-            .set_activity(serenity::model::gateway::Activity::listening(
-                "bullshit :joy_cat:",
+            .set_activity(serenity::model::gateway::Activity::playing(
+                "neng's a girl btw",
             ))
             .await;
 
@@ -92,6 +116,11 @@ impl DiscordEventHandler for EventHandler {
                             command
                                 .name("restart")
                                 .description("Restarts the bot. Can only be used by developer.")
+                        })
+                        .create_application_command(|command| {
+                            command 
+                                .name("shutdown")
+                                .description("Shuts down the bot gracefully. Can only be used by developers.")
                         })
                         .create_application_command(|command| {
                             command
@@ -141,6 +170,7 @@ impl DiscordEventHandler for EventHandler {
         if let Interaction::ApplicationCommand(command) = interaction {
             match command.data.name.as_str() {
                 "restart" => commands::restart(context, command).await,
+                "shutdown" => commands::shutdown(context, command).await,
                 "dm" => commands::dm(context, command).await,
                 "ghostping" => commands::ghostping(context, command).await,
                 "youtube" => commands::youtube(context, command).await,

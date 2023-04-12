@@ -55,6 +55,36 @@ pub async fn restart(context: Context, command: ApplicationCommandInteraction) {
     }
 }
 
+pub async fn shutdown(context: Context, command: ApplicationCommandInteraction) {
+    let (should_shut_down, response_content) = if command.user.id != OWNER_ID {
+        (
+            false,
+            "sorry but i dont take orders from idiots like u".to_string(),
+        )
+    } else {
+        (true, "shutting down".to_string())
+    };
+
+    command
+        .create_interaction_response(context, |response| {
+            response
+                .interaction_response_data(|message| {
+                    if command.user.id == OWNER_ID {
+                        message.content(response_content).ephemeral(true)
+                    } else {
+                        message.content(response_content).ephemeral(false) // for completeness
+                    }
+                })
+                .kind(InteractionResponseType::ChannelMessageWithSource)
+        })
+        .await
+        .expect("bozo failure");
+
+    if should_shut_down {
+        std::process::exit(0);
+    }
+}
+
 pub async fn dm(context: Context, command: ApplicationCommandInteraction) {
     let user = command
         .data
@@ -178,27 +208,29 @@ pub async fn youtube(context: Context, command: ApplicationCommandInteraction) {
     let response = response.unwrap();
     let html = response.text().await.unwrap();
 
-    let result = command.create_interaction_response(context, |response_data| {
-        response_data.interaction_response_data(|response_data| {
-            let document = Html::parse_document(&html);
-            let selector = Selector::parse("iframe").unwrap();
-            let iframe = document
-                .select(&selector)
-                .find(|iframe| {
-                    if let Some(src) = iframe.value().attr("src") {
-                        src.starts_with("https://www.youtube.com/embed/")
-                    } else {
-                        false
-                    }
-                })
-                .unwrap()
-                .value();
+    let result = command
+        .create_interaction_response(context, |response_data| {
+            response_data.interaction_response_data(|response_data| {
+                let document = Html::parse_document(&html);
+                let selector = Selector::parse("iframe").unwrap();
+                let iframe = document
+                    .select(&selector)
+                    .find(|iframe| {
+                        if let Some(src) = iframe.value().attr("src") {
+                            src.starts_with("https://www.youtube.com/embed/")
+                        } else {
+                            false
+                        }
+                    })
+                    .unwrap()
+                    .value();
 
-            let url = iframe.attr("src").unwrap();
+                let url = iframe.attr("src").unwrap();
 
-            response_data.content(url)
+                response_data.content(url)
+            })
         })
-    }).await;
+        .await;
 
     if let Err(error) = result {
         eprintln!(
