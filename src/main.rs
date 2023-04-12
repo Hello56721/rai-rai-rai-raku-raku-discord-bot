@@ -1,3 +1,5 @@
+use std::{sync::Arc, cell::Cell};
+
 use serde::{Deserialize, Serialize};
 use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
@@ -89,6 +91,18 @@ async fn send_message(
     channel
         .send_message(context.clone(), |message| message.content(p_message))
         .await
+}
+
+// A utility function to keeping the typing indicator alive.
+async fn keep_typing_until(p_context: &Context, p_channel: &ChannelId, mut should_stop: tokio::sync::oneshot::Receiver<bool>) {
+    loop {
+        std::thread::sleep(std::time::Duration::new(4, 0));
+        p_channel.broadcast_typing(p_context.clone()).await.unwrap();
+
+        if let Ok(_) = should_stop.try_recv() {
+            break;
+        }
+    }
 }
 
 // Get the GPT response to a message.
@@ -190,6 +204,17 @@ impl DiscordEventHandler for EventHandler {
         }
 
         if channel_name.trim() == "chatgpt" {
+            let (sender, reciever) = tokio::sync::oneshot::channel();
+
+            let handle = {
+                let channel_id = message.channel_id.clone();
+                let context = context.clone();
+
+                tokio::spawn(async move {
+                    keep_typing_until(&context, &channel_id, reciever).await
+                })
+            };
+
             message
                 .channel_id
                 .broadcast_typing(&context.http)
@@ -206,6 +231,10 @@ impl DiscordEventHandler for EventHandler {
             )
             .await
             .unwrap();
+
+            sender.send(true).unwrap();
+
+            handle.await.unwrap();
         } else {
             let lowercase_message = message.content.to_lowercase();
 
