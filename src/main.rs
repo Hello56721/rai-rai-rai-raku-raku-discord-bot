@@ -94,7 +94,7 @@ async fn send_message(
 // Get the GPT response to a message.
 async fn get_gpt_response(p_context: &mut Vec<GPTMessage>, p_message: &str) -> String {
     // Make it a ring buffer :ye:
-    if p_context.len() > 30 {
+    if p_context.len() > 10 {
         p_context.remove(0);
     }
 
