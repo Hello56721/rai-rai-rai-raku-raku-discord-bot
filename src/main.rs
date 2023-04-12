@@ -1,5 +1,3 @@
-use std::{sync::Arc, cell::Cell};
-
 use serde::{Deserialize, Serialize};
 use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
@@ -29,6 +27,7 @@ struct GPTMessage {
 
 // The structure of the payload to send.
 #[derive(Serialize)]
+#[allow(dead_code)]
 struct GPTPayload {
     frequency_penalty: i32,
     max_tokens: Option<i32>,
@@ -41,6 +40,7 @@ struct GPTPayload {
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 struct GPTChoice {
     index: i32,
     message: GPTMessage,
@@ -48,6 +48,7 @@ struct GPTChoice {
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 struct GPTUsage {
     prompt_tokens: i32,
     completion_tokens: i32,
@@ -55,6 +56,7 @@ struct GPTUsage {
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 struct GPTResponse {
     id: String,
     object: String,
