@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use serde::{Deserialize, Serialize};
 use serenity::{
     client::{Client, Context, EventHandler as DiscordEventHandler},
@@ -31,7 +33,7 @@ struct GPTMessage {
 struct GPTPayload {
     frequency_penalty: i32,
     max_tokens: Option<i32>,
-    messages: Vec<GPTMessage>,
+    messages: VecDeque<GPTMessage>,
     model: String,
     presence_penalty: i32,
     stream: bool,
@@ -69,7 +71,7 @@ struct GPTResponse {
 #[derive(Default)]
 struct Bot {
     id: UserId,
-    gpt_messages: Vec<GPTMessage>,
+    gpt_messages: VecDeque<GPTMessage>,
 }
 
 struct EventHandler {
@@ -108,17 +110,15 @@ async fn keep_typing_until(p_context: &Context, p_channel: &ChannelId, mut shoul
 }
 
 // Get the GPT response to a message.
-async fn get_gpt_response(p_context: &mut Vec<GPTMessage>, p_message: &str) -> String {
+async fn get_gpt_response(p_context: &mut VecDeque<GPTMessage>, p_message: &str) -> String {
     // Make it a ring buffer :ye:
     if p_context.len() > 10 {
-        p_context.remove(0);
-        p_context.remove(0);
-        println!("[DEBUG]: Removing one message from it");
+        p_context.pop_front();
+        p_context.pop_front();
+        p_context.pop_front();
     }
 
-    println!("[DEBUG]: Messages in context: {}", p_context.len());
-
-    p_context.push(GPTMessage {
+    p_context.push_back(GPTMessage {
         role: "system".to_string(),
         content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
     });
@@ -132,9 +132,7 @@ async fn get_gpt_response(p_context: &mut Vec<GPTMessage>, p_message: &str) -> S
 
     message.push_str(", my trusted evil confidant.");
 
-    println!("[CHATGPT MSG]: {}", message);
-
-    p_context.push(GPTMessage {
+    p_context.push_back(GPTMessage {
         role: "user".to_string(),
         content: message.to_string(),
     });
@@ -174,7 +172,7 @@ async fn get_gpt_response(p_context: &mut Vec<GPTMessage>, p_message: &str) -> S
                 let response: GPTResponse = serde_json::from_str(&result).unwrap();
                 let response = response.choices[0].message.content.clone();
 
-                p_context.push(GPTMessage {
+                p_context.push_back(GPTMessage {
                     role: "assistant".to_string(),
                     content: response.clone(),
                 });
@@ -299,7 +297,7 @@ impl DiscordEventHandler for EventHandler {
         let mut bot = self.bot.lock().await;
         bot.id = ready.user.id;
 
-        bot.gpt_messages.push(GPTMessage {
+        bot.gpt_messages.push_back(GPTMessage {
             role: "system".to_string(),
             content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
         });
