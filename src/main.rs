@@ -99,13 +99,16 @@ async fn send_message(
 
 // A utility function to keeping the typing indicator alive.
 async fn keep_typing_until(p_context: &Context, p_channel: &ChannelId, mut should_stop: tokio::sync::oneshot::Receiver<bool>) {
+    p_channel.broadcast_typing(p_context.clone()).await.unwrap();
+
     loop {
-        std::thread::sleep(std::time::Duration::new(4, 0));
-        p_channel.broadcast_typing(p_context.clone()).await.unwrap();
+        std::thread::sleep(std::time::Duration::new(7, 0));
 
         if let Ok(_) = should_stop.try_recv() {
             break;
         }
+
+        p_channel.broadcast_typing(p_context.clone()).await.unwrap();
     }
 }
 
@@ -228,14 +231,10 @@ impl DiscordEventHandler for EventHandler {
                 })
             };
 
-            message
-                .channel_id
-                .broadcast_typing(&context.http)
-                .await
-                .unwrap();
-
             let gpt_response =
                 get_gpt_response(&mut bot.gpt_messages, message.content.as_str()).await;
+
+            sender.send(true).unwrap();
 
             reply_to_message(
                 &context,
@@ -243,8 +242,6 @@ impl DiscordEventHandler for EventHandler {
                 &gpt_response[0..std::cmp::min(gpt_response.len(), 1998)].to_lowercase(),
             )
             .await;
-
-            sender.send(true).unwrap();
 
             handle.await.unwrap();
         } else {
