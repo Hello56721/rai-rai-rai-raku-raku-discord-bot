@@ -216,7 +216,7 @@ impl DiscordEventHandler for EventHandler {
             return;
         }
 
-        if channel_name.trim() == "chatgpt" {
+        if channel_name.trim() == "chatgpt" && !(message.content.starts_with("\\\\\\")) {
             let (sender, reciever) = tokio::sync::oneshot::channel();
 
             let handle = {
