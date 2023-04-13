@@ -112,7 +112,7 @@ async fn keep_typing_until(p_context: &Context, p_channel: &ChannelId, mut shoul
 // Get the GPT response to a message.
 async fn get_gpt_response(p_context: &mut VecDeque<GPTMessage>, p_message: &str) -> String {
     // Make it a ring buffer :ye:
-    if p_context.len() > 10 {
+    if p_context.len() > 24 {
         p_context.pop_front();
         p_context.pop_front();
         p_context.pop_front();
