@@ -163,24 +163,28 @@ async fn get_gpt_response(p_context: &mut VecDeque<GPTMessage>, p_message: &str)
 
     match result {
         Err(error) => {
-            eprintln!("[ERROR]: {:?}", error);
-            "h".to_string()
+            format!("`[ERROR]: {:?}`", error)
         }
         Ok(result) => match result.text().await {
             Err(error) => {
-                eprintln!("[ERROR]: {:?}", error);
-                "h".to_string()
+                format!("`[ERROR]: {:?}`", error)
             }
             Ok(result) => {
-                let response: GPTResponse = serde_json::from_str(&result).unwrap();
-                let response = response.choices[0].message.content.clone();
+                let response = serde_json::from_str::<GPTResponse>(&result);
+                
+                match response {
+                    Err(error) => format!("`[ERROR]: {:?}`", error),
+                    Ok(response) => {
+                        let response = response.choices[0].message.content.clone();
 
-                p_context.push_back(GPTMessage {
-                    role: "assistant".to_string(),
-                    content: response.clone(),
-                });
+                        p_context.push_back(GPTMessage {
+                            role: "assistant".to_string(),
+                            content: response.clone(),
+                        });
 
-                response
+                        response
+                    }
+                }
             }
         },
     }
