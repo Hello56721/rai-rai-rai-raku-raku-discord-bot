@@ -1,16 +1,17 @@
 use scraper::Selector;
-use serenity::client::Context;
-use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
-use serenity::model::application::interaction::application_command::CommandDataOptionValue;
-use serenity::model::application::interaction::InteractionResponseType;
-use serenity::Error;
+
+use serenity::{
+    client::Context,
+    model::application::interaction::{
+        application_command::{ApplicationCommandInteraction, CommandDataOptionValue},
+        InteractionResponseType,
+    },
+    Error,
+};
 
 use scraper::Html;
 
-use std::collections::VecDeque;
 use std::process::Command;
-
-use crate::GPTMessage;
 
 use super::OWNER_ID;
 
@@ -238,31 +239,6 @@ pub async fn youtube(context: Context, command: ApplicationCommandInteraction) {
     if let Err(error) = result {
         eprintln!(
             "[ERROR]: Failed to respond to youtube command. Here's why:\n{:?}",
-            error
-        );
-    }
-}
-
-pub async fn reset_chatgpt(
-    context: Context,
-    command: ApplicationCommandInteraction,
-    gpt_messages: &mut VecDeque<GPTMessage>,
-) {
-    gpt_messages.clear();
-
-    let result = command
-        .create_interaction_response(context, |response_data| {
-            response_data.interaction_response_data(|response_data| {
-                response_data.content(
-                    "chatgpt has undergone a successful memory wipe and should no longer stall",
-                )
-            })
-        })
-        .await;
-
-    if let Err(error) = result {
-        eprintln!(
-            "[ERROR]: Failed to respond to reset_chatgpt command. Here's why:\n{:?}",
             error
         );
     }
