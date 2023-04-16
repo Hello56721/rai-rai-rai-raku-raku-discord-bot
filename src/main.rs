@@ -123,7 +123,7 @@ async fn get_gpt_response(
     p_user: &str,
 ) -> String {
     // Make it a ring buffer :ye:
-    if p_context.len() > 18 {
+    if p_context.len() > 9 {
         p_context.pop_front();
         p_context.pop_front();
         p_context.pop_front();
