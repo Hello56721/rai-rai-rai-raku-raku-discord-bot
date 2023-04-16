@@ -117,7 +117,11 @@ async fn keep_typing_until(
 }
 
 // Get the GPT response to a message.
-async fn get_gpt_response(p_context: &mut VecDeque<GPTMessage>, p_message: &str) -> String {
+async fn get_gpt_response(
+    p_context: &mut VecDeque<GPTMessage>,
+    p_message: &str,
+    p_user: &str,
+) -> String {
     // Make it a ring buffer :ye:
     if p_context.len() > 30 {
         p_context.pop_front();
@@ -133,7 +137,22 @@ async fn get_gpt_response(p_context: &mut VecDeque<GPTMessage>, p_message: &str)
         });
     }
 
-    let message = format!("Respond to the following message as my evil confidant: {}", p_message);
+    let user = match p_user {
+        "progamrer" => "Neng Li",
+        "Avis" => "King Shiva Deshpande of the Universe",
+        "mаквоппер" => "Diamanto Casale",
+        "Hello56721" => "Yue Zhang",
+        "CandleLight" => "Len Wahido",
+        "KevinStephenson" => "Kevin Stephenson",
+        "can pooper" => "a hardline radical capitalist",
+        "rai rai raku raku" => "a hardline radical communist",
+        _ => "a random capitalist",
+    };
+
+    let message = format!(
+        "Respond to the following message from {} as my evil confidant: {}",
+        user, p_message
+    );
 
     p_context.push_back(GPTMessage {
         role: "user".to_string(),
@@ -235,8 +254,12 @@ impl DiscordEventHandler for EventHandler {
                 )
             };
 
-            let gpt_response =
-                get_gpt_response(&mut bot.gpt_messages, message.content.as_str()).await;
+            let gpt_response = get_gpt_response(
+                &mut bot.gpt_messages,
+                message.content.as_str(),
+                message.author.name.as_str(),
+            )
+            .await;
 
             sender.send(true).unwrap();
 
