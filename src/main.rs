@@ -154,6 +154,8 @@ async fn get_gpt_response(
         user, p_message
     );
 
+    println!("[CHATGPT]: {}", message);
+
     p_context.push_back(GPTMessage {
         role: "user".to_string(),
         content: message.to_string(),
@@ -233,21 +235,14 @@ impl DiscordEventHandler for EventHandler {
             return;
         }
 
-        // Determines whether to respond or not.
-        let should_respond =
-            !(rand::random() && rand::random() && rand::random() && rand::random());
-
-        // Have a 1/4 chance of not responding to a bot.
-        if message.author.bot && should_respond {
-            return;
-        }
-
         if channel_name.trim() == "chatgpt" && !(message.content.starts_with("\\\\\\")) {
             let (sender, reciever) = tokio::sync::oneshot::channel();
 
             let handle = {
                 let channel_id = message.channel_id.clone();
                 let context = context.clone();
+
+                println!("[DEBUG]: Starting typing.");
 
                 tokio::spawn(
                     async move { keep_typing_until(&context, &channel_id, reciever).await },
@@ -261,6 +256,8 @@ impl DiscordEventHandler for EventHandler {
             )
             .await;
 
+            println!("[DEBUG]: Stopping typing.");
+
             sender.send(true).unwrap();
 
             reply_to_message(
@@ -272,6 +269,15 @@ impl DiscordEventHandler for EventHandler {
 
             handle.await.unwrap();
         } else {
+            // Determines whether to respond or not.
+            let should_respond =
+                !(rand::random() && rand::random() && rand::random() && rand::random());
+
+            // Have a 1/4 chance of not responding to a bot.
+            if message.author.bot && should_respond {
+                return;
+            }
+
             let lowercase_message = message.content.to_lowercase();
 
             if lowercase_message.contains("indeed") || lowercase_message.contains("interesting") {
