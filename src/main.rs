@@ -123,19 +123,16 @@ async fn get_gpt_response(
     p_user: &str,
 ) -> String {
     // Make it a ring buffer :ye:
-    if p_context.len() > 30 {
+    if p_context.len() > 18 {
         p_context.pop_front();
         p_context.pop_front();
         p_context.pop_front();
     }
 
-    // Send a system message every 6 message.
-    if p_context.len() % 6 == 0 {
-        p_context.push_back(GPTMessage {
-            role: "system".to_string(),
-            content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
-        });
-    }
+    p_context.push_back(GPTMessage {
+        role: "system".to_string(),
+        content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
+    });
 
     let user = match p_user {
         "progamrer" => "Neng Li",
