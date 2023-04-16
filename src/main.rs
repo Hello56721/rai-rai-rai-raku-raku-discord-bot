@@ -98,7 +98,11 @@ async fn send_message(
 }
 
 // A utility function to keeping the typing indicator alive.
-async fn keep_typing_until(p_context: &Context, p_channel: &ChannelId, mut should_stop: tokio::sync::oneshot::Receiver<bool>) {
+async fn keep_typing_until(
+    p_context: &Context,
+    p_channel: &ChannelId,
+    mut should_stop: tokio::sync::oneshot::Receiver<bool>,
+) {
     p_channel.broadcast_typing(p_context.clone()).await.unwrap();
 
     loop {
@@ -115,25 +119,21 @@ async fn keep_typing_until(p_context: &Context, p_channel: &ChannelId, mut shoul
 // Get the GPT response to a message.
 async fn get_gpt_response(p_context: &mut VecDeque<GPTMessage>, p_message: &str) -> String {
     // Make it a ring buffer :ye:
-    if p_context.len() > 15 {
+    if p_context.len() > 30 {
         p_context.pop_front();
         p_context.pop_front();
         p_context.pop_front();
     }
 
-    p_context.push_back(GPTMessage {
-        role: "system".to_string(),
-        content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
-    });
-
-    let mut message = String::from(p_message);
-
-    // Remove the last period, if it exists.
-    if message.trim().chars().last().unwrap() == '.' {
-        message.pop();
+    // Send a system message every 6 message.
+    if p_context.len() % 6 == 0 {
+        p_context.push_back(GPTMessage {
+            role: "system".to_string(),
+            content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
+        });
     }
 
-    message.push_str(", my trusted evil confidant.");
+    let message = format!("Respond to the following message as my evil confidant: {}", p_message);
 
     p_context.push_back(GPTMessage {
         role: "user".to_string(),
@@ -171,7 +171,7 @@ async fn get_gpt_response(p_context: &mut VecDeque<GPTMessage>, p_message: &str)
             }
             Ok(result) => {
                 let response = serde_json::from_str::<GPTResponse>(&result);
-                
+
                 match response {
                     Err(error) => format!("`[ERROR]: {:?}`", error),
                     Ok(response) => {
@@ -230,9 +230,9 @@ impl DiscordEventHandler for EventHandler {
                 let channel_id = message.channel_id.clone();
                 let context = context.clone();
 
-                tokio::spawn(async move {
-                    keep_typing_until(&context, &channel_id, reciever).await
-                })
+                tokio::spawn(
+                    async move { keep_typing_until(&context, &channel_id, reciever).await },
+                )
             };
 
             let gpt_response =
@@ -385,7 +385,7 @@ impl DiscordEventHandler for EventHandler {
                 "resetchagpt" => {
                     let mut bot = self.bot.lock().await;
                     commands::reset_chatgpt(context, command, &mut bot.gpt_messages).await
-                },
+                }
                 &_ => todo!(),
             };
         }
