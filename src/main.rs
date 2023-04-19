@@ -439,4 +439,3 @@ async fn main() {
 
     bot.start().await.expect("Failed to start the bot.");
 }
-
