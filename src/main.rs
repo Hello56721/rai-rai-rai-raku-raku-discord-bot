@@ -138,7 +138,7 @@ async fn get_gpt_response(
         "progamrer" => "Neng Li",
         "Avis" => "King Shiva Deshpande of the Universe",
         "mаквоппер" => "Diamanto Casale",
-        "Hello56721" => "Yue Zhang",
+        "Hello56721" => "Svelte Osborn",
         "CandleLight" => "Len Wahido",
         "KevinStephenson" => "Kevin Stephenson",
         "can pooper" => "a hardline radical capitalist",
@@ -425,6 +425,7 @@ impl DiscordEventHandler for EventHandler {
         }
     }
 }
+
 
 #[tokio::main]
 async fn main() {
