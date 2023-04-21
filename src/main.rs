@@ -321,13 +321,15 @@ impl DiscordEventHandler for EventHandler {
     async fn ready(&self, context: Context, ready: Ready) {
         println!("[INFO]: The bot has logged on as {}", ready.user.name);
 
-        let mut bot = self.bot.lock().await;
-        bot.id = ready.user.id;
+        {
+            let mut bot = self.bot.lock().await;
+            bot.id = ready.user.id;
 
-        bot.gpt_messages.push_back(GPTMessage {
-            role: "system".to_string(),
-            content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
-        });
+            bot.gpt_messages.push_back(GPTMessage {
+                role: "system".to_string(),
+                content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
+            });
+        }
 
         context
             .set_activity(serenity::model::gateway::Activity::playing(
