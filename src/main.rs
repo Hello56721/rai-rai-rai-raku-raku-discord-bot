@@ -225,11 +225,13 @@ impl DiscordEventHandler for EventHandler {
             message.author.name, message.content, channel_name
         );
 
-        let mut bot = self.bot.lock().await;
+        {
+            let bot = self.bot.lock().await;
 
-        // Prevent the bot from responding to it's own messages
-        if bot.id == message.author.id {
-            return;
+            // Prevent the bot from responding to it's own messages
+            if bot.id == message.author.id {
+                return;
+            }
         }
 
         if channel_name.trim() == "chatgpt" && !(message.content.starts_with("\\\\\\")) {
@@ -246,12 +248,16 @@ impl DiscordEventHandler for EventHandler {
                 )
             };
 
-            let gpt_response = get_gpt_response(
-                &mut bot.gpt_messages,
-                message.content.as_str(),
-                message.author.name.as_str(),
-            )
-            .await;
+            let gpt_response = {
+                let mut bot = self.bot.lock().await;
+
+                get_gpt_response(
+                    &mut bot.gpt_messages,
+                    message.content.as_str(),
+                    message.author.name.as_str(),
+                )
+                .await
+            };
 
             println!("[DEBUG]: Stopping typing.");
 
