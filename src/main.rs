@@ -138,7 +138,7 @@ async fn get_gpt_response(
         "progamrer" => "Neng Li",
         "Avis" => "King Shiva Deshpande of the Universe",
         "mаквоппер" => "Diamanto Casale",
-        "Hello56721" => "Yue Zhang",
+        "Hello56721" => "Svelte Osborn",
         "CandleLight" => "Len Wahido",
         "KevinStephenson" => "Kevin Stephenson",
         "can pooper" => "a hardline radical capitalist",
@@ -225,11 +225,13 @@ impl DiscordEventHandler for EventHandler {
             message.author.name, message.content, channel_name
         );
 
-        let mut bot = self.bot.lock().await;
+        {
+            let bot = self.bot.lock().await;
 
-        // Prevent the bot from responding to it's own messages
-        if bot.id == message.author.id {
-            return;
+            // Prevent the bot from responding to it's own messages
+            if bot.id == message.author.id {
+                return;
+            }
         }
 
         if channel_name.trim() == "chatgpt" && !(message.content.starts_with("\\\\\\")) {
@@ -246,12 +248,16 @@ impl DiscordEventHandler for EventHandler {
                 )
             };
 
-            let gpt_response = get_gpt_response(
-                &mut bot.gpt_messages,
-                message.content.as_str(),
-                message.author.name.as_str(),
-            )
-            .await;
+            let gpt_response = {
+                let mut bot = self.bot.lock().await;
+
+                get_gpt_response(
+                    &mut bot.gpt_messages,
+                    message.content.as_str(),
+                    message.author.name.as_str(),
+                )
+                .await
+            };
 
             println!("[DEBUG]: Stopping typing.");
 
@@ -321,13 +327,15 @@ impl DiscordEventHandler for EventHandler {
     async fn ready(&self, context: Context, ready: Ready) {
         println!("[INFO]: The bot has logged on as {}", ready.user.name);
 
-        let mut bot = self.bot.lock().await;
-        bot.id = ready.user.id;
+        {
+            let mut bot = self.bot.lock().await;
+            bot.id = ready.user.id;
 
-        bot.gpt_messages.push_back(GPTMessage {
-            role: "system".to_string(),
-            content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
-        });
+            bot.gpt_messages.push_back(GPTMessage {
+                role: "system".to_string(),
+                content: CHATGPT_SYSTEM_MESSAGE.trim().to_string(),
+            });
+        }
 
         context
             .set_activity(serenity::model::gateway::Activity::playing(
@@ -417,6 +425,7 @@ impl DiscordEventHandler for EventHandler {
         }
     }
 }
+
 
 #[tokio::main]
 async fn main() {
