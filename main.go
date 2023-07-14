@@ -52,15 +52,9 @@ func main() {
 func onReady(pSession *discordgo.Session, pReadyEvent *discordgo.Ready) {
     mainChannel := "1076539147327643689"
 
-    _, error := pSession.ChannelMessageSend(mainChannel, "Hello!")
-    if error != nil {
-        fmt.Fprintln(os.Stderr, "failed to send message bc of ", error)
-        return
-    }
-
     command := exec.Command("python3", "/home/yue/projects/code/sandbox/main.py")
 
-    terminal, error = pty.Start(command)
+    terminal, error := pty.Start(command)
     if error != nil {
         fmt.Fprintln(os.Stderr, "failed to open fake terminal bc of ", error)
         return
