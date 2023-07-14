@@ -54,7 +54,8 @@ func onReady(pSession *discordgo.Session, pReadyEvent *discordgo.Ready) {
 
     command := exec.Command("./server.sh", "survival")
 
-    terminal, error := pty.Start(command)
+    var error error
+    terminal, error = pty.Start(command)
     if error != nil {
         fmt.Fprintln(os.Stderr, "failed to open fake terminal bc of ", error)
         return
@@ -73,9 +74,10 @@ func onMessageCreate(pSession *discordgo.Session, pMessageCreateEvent *discordgo
     mainChannel := "1076539147327643689"
 
     if terminalReady && pMessageCreateEvent.ChannelID == mainChannel && pSession.State.User.ID != pMessageCreateEvent.Author.ID {
-        n, error := terminal.Write([]byte(pMessageCreateEvent.Content + "\n"))
+        command := (pMessageCreateEvent.Content)
+        n, error := terminal.WriteString(command + "\n")
         if error != nil {
-            fmt.Fprintln(os.Stderr, "[ERROR]: ", error)
+            fmt.Fprintln(os.Stderr, "[ERROR]: ", error.Error())
             return
         }
 
