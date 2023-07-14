@@ -75,12 +75,10 @@ func onMessageCreate(pSession *discordgo.Session, pMessageCreateEvent *discordgo
 
     if terminalReady && pMessageCreateEvent.ChannelID == mainChannel && pSession.State.User.ID != pMessageCreateEvent.Author.ID {
         command := (pMessageCreateEvent.Content)
-        n, error := terminal.WriteString(command + "\n")
+        _, error := terminal.WriteString(command + "\n")
         if error != nil {
             fmt.Fprintln(os.Stderr, "[ERROR]: ", error.Error())
             return
         }
-
-        fmt.Printf("wrote %d characters\n", n)
     }
 }
