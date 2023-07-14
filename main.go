@@ -52,7 +52,7 @@ func main() {
 func onReady(pSession *discordgo.Session, pReadyEvent *discordgo.Ready) {
     mainChannel := "1076539147327643689"
 
-    command := exec.Command("python3", "/home/yue/projects/code/sandbox/main.py")
+    command := exec.Command("./server.sh", "survival")
 
     terminal, error := pty.Start(command)
     if error != nil {
