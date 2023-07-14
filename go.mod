@@ -2,7 +2,10 @@ module github.com/earthtraveller1/rai-rai-raku-raku
 
 go 1.20
 
-require github.com/bwmarrin/discordgo v0.27.1
+require (
+	github.com/bwmarrin/discordgo v0.27.1
+	github.com/creack/pty v1.1.18
+)
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect

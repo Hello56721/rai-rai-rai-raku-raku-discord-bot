@@ -1,15 +1,21 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"os/signal"
 	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/creack/pty"
 )
+
+var terminal *os.File
+var terminalReady bool = false
 
 func main() {
     token, error := ioutil.ReadFile("user/token.txt")
@@ -24,6 +30,10 @@ func main() {
         return
     }
 
+    discord.AddHandler(onReady)
+    discord.AddHandler(onMessageCreate)
+    discord.Identify.Intents = discordgo.IntentGuildMessages
+
     error = discord.Open()
     if error != nil {
         fmt.Fprintln(os.Stderr, "[ERROR]: Failed to open a connection to Discord. Error", error)
@@ -35,4 +45,46 @@ func main() {
     signalChannel := make(chan os.Signal, 1)
     signal.Notify(signalChannel, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
     <-signalChannel
+
+    terminal.Close()
+}
+
+func onReady(pSession *discordgo.Session, pReadyEvent *discordgo.Ready) {
+    mainChannel := "1076539147327643689"
+
+    _, error := pSession.ChannelMessageSend(mainChannel, "Hello!")
+    if error != nil {
+        fmt.Fprintln(os.Stderr, "failed to send message bc of ", error)
+        return
+    }
+
+    command := exec.Command("python3", "/home/yue/projects/code/sandbox/main.py")
+
+    terminal, error = pty.Start(command)
+    if error != nil {
+        fmt.Fprintln(os.Stderr, "failed to open fake terminal bc of ", error)
+        return
+    }
+
+    terminalReady = true
+
+    scanner := bufio.NewScanner(terminal)
+
+    for scanner.Scan() {
+        pSession.ChannelMessageSend(mainChannel, "`" + scanner.Text() + "`")
+    }
+}
+
+func onMessageCreate(pSession *discordgo.Session, pMessageCreateEvent *discordgo.MessageCreate) {
+    mainChannel := "1076539147327643689"
+
+    if terminalReady && pMessageCreateEvent.ChannelID == mainChannel && pSession.State.User.ID != pMessageCreateEvent.Author.ID {
+        n, error := terminal.Write([]byte(pMessageCreateEvent.Content + "\n"))
+        if error != nil {
+            fmt.Fprintln(os.Stderr, "[ERROR]: ", error)
+            return
+        }
+
+        fmt.Printf("wrote %d characters\n", n)
+    }
 }
