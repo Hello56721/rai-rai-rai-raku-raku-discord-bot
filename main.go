@@ -84,9 +84,14 @@ func onReady(pSession *discordgo.Session, pReadyEvent *discordgo.Ready) {
 func onMessageCreate(pSession *discordgo.Session, pMessageCreateEvent *discordgo.MessageCreate) {
     mainChannel := "1076539147327643689"
 
-    if terminalReady && pMessageCreateEvent.ChannelID == mainChannel && pSession.State.User.ID != pMessageCreateEvent.Author.ID {
+    messageFromMainChannel := pMessageCreateEvent.ChannelID == mainChannel 
+    notFromMyself := pSession.State.User.ID != pMessageCreateEvent.Author.ID 
+    fromHello56721 := pMessageCreateEvent.Author.ID == "650439182204010496"
+
+    if terminalReady && messageFromMainChannel && notFromMyself && fromHello56721 {
         command := (pMessageCreateEvent.Content)
         _, error := terminal.WriteString(command + "\n")
+
         if error != nil {
             fmt.Fprintln(os.Stderr, "[ERROR]: ", error.Error())
             return
