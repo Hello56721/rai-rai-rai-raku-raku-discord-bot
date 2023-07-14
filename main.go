@@ -17,7 +17,16 @@ import (
 var terminal *os.File
 var terminalReady bool = false
 
+var serverName string
+
 func main() {
+    if len( os.Args ) < 2 {
+        fmt.Fprintf(os.Stderr, "[USAGE]: %s <serverName>", os.Args[0])
+        return
+    }
+
+    serverName = os.Args[1]
+
     token, error := ioutil.ReadFile("user/token.txt")
     if error != nil {
         fmt.Fprintln(os.Stderr, "[ERROR]: Failed to read the token file. Maybe it doesn't exist?")
@@ -52,7 +61,7 @@ func main() {
 func onReady(pSession *discordgo.Session, pReadyEvent *discordgo.Ready) {
     mainChannel := "1076539147327643689"
 
-    command := exec.Command("./server.sh", "survival")
+    command := exec.Command("./server.sh", serverName)
 
     var error error
     terminal, error = pty.Start(command)
@@ -68,6 +77,8 @@ func onReady(pSession *discordgo.Session, pReadyEvent *discordgo.Ready) {
     for scanner.Scan() {
         pSession.ChannelMessageSend(mainChannel, "`" + scanner.Text() + "`")
     }
+
+    fmt.Println("[INFO]: Okay, we are done now. You can close this terminal now.")
 }
 
 func onMessageCreate(pSession *discordgo.Session, pMessageCreateEvent *discordgo.MessageCreate) {
