@@ -1,3 +1,3 @@
 # rai rai raku raku
 
-A Discord bot that I am finally bringing back. It has no purpose whatsoever and I mainly use it for either fun or to annoy people.
+A way for me to log my Minecraft server onto the Discord server.
